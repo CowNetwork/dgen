@@ -1,5 +1,8 @@
-package network.cow.dgen.blueprint
+package network.cow.dgen.visual
 
+import network.cow.dgen.blueprint.NormalRoomBlueprint
+import network.cow.dgen.blueprint.RoomBlueprint
+import network.cow.dgen.blueprint.RoomBlueprintLoader
 import network.cow.dgen.math.Line2D
 import network.cow.dgen.math.Polygon2D
 import network.cow.dgen.math.Vector2D
