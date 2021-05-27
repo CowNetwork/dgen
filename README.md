@@ -30,7 +30,7 @@ Now you can simply load the blueprints, generate a seed and let the generator do
 ```kotlin
 // load the blueprint sprites
 val spriteSheetImage: BufferedImage
-val blueprints = ImageRoomBlueprintLoader(spriteSheetImage, gridSize = 16).load().toMutableList()
+val blueprints = ImageRoomBlueprintLoader(spriteSheetImage, gridSize = 16).load()
 
 val seed = generateSeed()
 val generator = SinglePathDungeonGenerator(seed, rooms, pathLength = 15)
