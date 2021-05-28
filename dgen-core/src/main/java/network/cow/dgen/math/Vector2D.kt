@@ -26,12 +26,12 @@ open class Vector2D(val x: Double, val y: Double) {
     operator fun div(other: Vector2D) = Vector2D(this.x / other.x, this.y / other.y)
     operator fun div(value: Double) = Vector2D(this.x / value, this.y / value)
 
-    fun rotate(degrees: Double, clockwise: Boolean = true): Vector2D {
-        val direction = if (clockwise) 1 else -1
+    fun rotate(degrees: Double, clockwise: Boolean = false): Vector2D {
+        val theta = if (clockwise) 360 - degrees else degrees
 
         return Vector2D(
-            this.x * betterCos(degrees * direction) - this.y * betterSin(degrees * direction),
-            this.x * betterSin(degrees * direction) + this.y * betterCos(degrees * direction)
+            this.x * betterCos(theta) - this.y * betterSin(theta),
+            this.x * betterSin(theta) + this.y * betterCos(theta)
         )
     }
 

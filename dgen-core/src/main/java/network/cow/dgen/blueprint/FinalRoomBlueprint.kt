@@ -8,9 +8,9 @@ import network.cow.dgen.math.Vector2D
  */
 class FinalRoomBlueprint(
     name: String, outline: Polygon2D,
-    val passagePoint: Vector2D, rotation: Float = 0f,
+    passagePoints: List<Vector2D>, rotation: Float = 0f,
     val stairsPosition: Vector2D
-) : RoomBlueprint(name, outline, listOf(passagePoint), rotation) {
+) : RoomBlueprint(name, outline, passagePoints, rotation) {
 
     init {
         if (stairsPosition !in outline) throw IllegalArgumentException("The stairsPosition needs to be in the outline.")
@@ -22,7 +22,7 @@ class FinalRoomBlueprint(
         return FinalRoomBlueprint(
             this.name,
             rotatedOutline,
-            passagePoint.rotate(degrees.toDouble(), clockwise),
+            passagePoints.map { it.rotate(degrees.toDouble(), clockwise) },
             this.rotation + degrees,
             stairsPosition.rotate(degrees.toDouble(), clockwise)
         )
@@ -32,7 +32,7 @@ class FinalRoomBlueprint(
         return FinalRoomBlueprint(
             this.name,
             this.outline + by,
-            this.passagePoint + by,
+            this.passagePoints.map { it + by },
             this.rotation,
             this.stairsPosition + by
         )

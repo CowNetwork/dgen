@@ -66,7 +66,7 @@ class DungeonVisualizer(private vararg val rooms: DungeonRoom) : JComponent() {
                         FinalRoomBlueprint(
                             blueprint.name,
                             blueprint.outline + (Vector2D.NULL - min),
-                            blueprint.passagePoint + (Vector2D.NULL - min),
+                            blueprint.passagePoints.map { it + (Vector2D.NULL - min) },
                             stairsPosition = blueprint.stairsPosition + (Vector2D.NULL - min)
                         ),
                         connectedRoom.passages

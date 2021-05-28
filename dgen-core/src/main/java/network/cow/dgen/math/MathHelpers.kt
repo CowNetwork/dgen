@@ -5,7 +5,8 @@ import kotlin.math.sin
 
 internal fun betterCos(degree: Double): Double {
     if (degree < 0) return -1 * betterCos(degree * -1)
-    return when (degree) {
+    return when (degree % 360) {
+        0.0 -> 1.0
         90.0 -> 0.0
         180.0 -> -1.0
         270.0 -> 0.0
@@ -15,7 +16,8 @@ internal fun betterCos(degree: Double): Double {
 
 internal fun betterSin(degree: Double): Double {
     if (degree < 0) return -1 * betterSin(degree * -1)
-    return when (degree) {
+    return when (degree % 360) {
+        0.0 -> 0.0
         90.0 -> 1.0
         180.0 -> 0.0
         270.0 -> -1.0

@@ -63,7 +63,7 @@ abstract class RoomBlueprint(
         val possibleFits = mutableListOf<PossibleFit>()
 
         ROTATION_DEGREES.forEach { degrees ->
-            val otherRotated = other.rotate(degrees)
+            val otherRotated = other.rotate(degrees, true)
 
             otherRotated.passagePoints.forEachIndexed { index, otherPassage ->
                 // move other to passage point, so that otherPassage is exactly next to passagePoint
