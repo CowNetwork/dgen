@@ -44,7 +44,7 @@ dungeon, that we've created:
 
 ```kotlin
 val visualizer = DungeonVisualizer(*generatedRooms.toTypedArray())
-JOptionPane.showMessageDialog(null, visualizer)
+visualizer.isVisible = true
 ```
 
 And done. The application should now show something like the following:
