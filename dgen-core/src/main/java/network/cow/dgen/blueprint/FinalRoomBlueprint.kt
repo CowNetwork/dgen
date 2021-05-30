@@ -16,6 +16,7 @@ class FinalRoomBlueprint(
         if (stairsPosition !in outline) throw IllegalArgumentException("The stairsPosition needs to be in the outline.")
     }
 
+    // TODO nicer, so that we dont have to rotate the other stuff as well.
     override fun rotate(degrees: Float, clockwise: Boolean): RoomBlueprint {
         val rotatedOutline = this.outline.rotate(degrees.toDouble(), clockwise)
 

@@ -9,9 +9,17 @@ import network.cow.dgen.blueprint.NormalRoomBlueprint
 import network.cow.dgen.blueprint.RoomBlueprint
 import network.cow.dgen.blueprint.SpawnRoomBlueprint
 import network.cow.dgen.generateHex
-import kotlin.random.Random
 
 /**
+ * This generator works by just attaching one room to another to form a
+ * single path dungeon.
+ * Note that this is naturally capped for each seed, because at some point we
+ * can't add another room to the last one. This could result in a dungeon without
+ * a final room, that is why this algorithm should only be used for testing.
+ *
+ * But maybe an ugly workaround for this issue: Generating so many seeds and their
+ * respective dungeons until the path length is reached.
+ *
  * @author Tobias Büser
  */
 class SinglePathDungeonGenerator(
@@ -19,12 +27,15 @@ class SinglePathDungeonGenerator(
     pathLength: Int
 ) : DungeonGenerator(seed, blueprints, Options(pathLength + 1, pathLength)) {
 
-    private val random = Random(seed)
     private val spawnRoomBlueprint = blueprints.filterIsInstance<SpawnRoomBlueprint>().random(random)
 
-    companion object {
-        private const val MAX_ITERATIONS = 100
-    }
+    /**
+     * The maximum iterations has to be at least the
+     * [DungeonGenerator.Options.numberOfRooms] long.
+     * Everything exceeding this limit will be the dungeon trying to find a fit
+     * where possibly no fit can be found.
+     */
+    private val maxIterations = options.numberOfRooms * 2
 
     override fun generate(): List<DungeonRoom> {
         val generatedRooms = mutableMapOf<String, DungeonRoom>()
@@ -40,7 +51,7 @@ class SinglePathDungeonGenerator(
 
         val currentRooms = mutableListOf<DungeonRoom>(spawnRoom)
         val newCurrentRooms = mutableListOf<DungeonRoom>()
-        while (currentRooms.isNotEmpty() && iterations < MAX_ITERATIONS) {
+        while (currentRooms.isNotEmpty() && iterations < maxIterations) {
             for (currentRoom in currentRooms) {
                 newCurrentRooms.addAll(this.populate(currentRoom, generatedRooms))
             }
@@ -78,13 +89,13 @@ class SinglePathDungeonGenerator(
 
         if (options.maximumRoomDistance - room.depth == 1) {
             // find final room blueprint, if exists
-            val finalRoomFit = possibleFits.filter { it.blueprint is FinalRoomBlueprint }
+            val finalRoomFit = possibleFits.filter { it.other is FinalRoomBlueprint }
                 .randomOrNull(random) ?: return emptyList()
 
             val finalRoom = DungeonFinalRoom(
                 generateHex(8, random),
                 room.depth + 1,
-                finalRoomFit.blueprint as FinalRoomBlueprint
+                finalRoomFit.other as FinalRoomBlueprint
             )
 
             this.connect(room, finalRoomFit.index, finalRoomFit.otherIndex, finalRoom)
@@ -93,14 +104,14 @@ class SinglePathDungeonGenerator(
         }
 
         // add a room with pp>=2
-        val newRoomFit = possibleFits.filter { it.blueprint is NormalRoomBlueprint }
-            .filter { it.blueprint.passagePoints.size >= 2 }
+        val newRoomFit = possibleFits.filter { it.other is NormalRoomBlueprint }
+            .filter { it.other.passagePoints.size >= 2 }
             .randomOrNull(random) ?: return emptyList()
 
         val newRoom = DungeonNormalRoom(
             generateHex(8, random),
             room.depth + 1,
-            newRoomFit.blueprint as NormalRoomBlueprint
+            newRoomFit.other as NormalRoomBlueprint
         )
         this.connect(room, newRoomFit.index, newRoomFit.otherIndex, newRoom)
         generatedRooms[newRoom.id] = newRoom
@@ -115,15 +126,18 @@ class SinglePathDungeonGenerator(
         otherRoom.passages[otherPassageIndex] = room.id
     }
 
-    private fun findAllFits(room: DungeonRoom, generatedRooms: MutableMap<String, DungeonRoom>): List<RoomBlueprint.PossibleFit> {
+    private fun findAllFits(
+        room: DungeonRoom,
+        generatedRooms: MutableMap<String, DungeonRoom>
+    ): List<RoomBlueprint.PossibleFit> {
         val fits = mutableListOf<RoomBlueprint.PossibleFit>()
 
         room.blueprint.passagePoints.forEach { passagePoint ->
             // find possible room for this passage
-            val rawFits = room.blueprint.findAllFits(blueprints, passagePoint).filter { it.blueprint !is SpawnRoomBlueprint }
+            val rawFits = room.blueprint.findAllFits(blueprints, passagePoint).filter { it.other !is SpawnRoomBlueprint }
             val possibleFits = rawFits.filter { fit ->
                 // check that these fits do not overlap with already existing rooms
-                !generatedRooms.values.any { generatedRoom -> fit.blueprint.outline.overlapsWith(generatedRoom.blueprint.outline) }
+                !generatedRooms.values.any { generatedRoom -> fit.other.outline.overlapsWith(generatedRoom.blueprint.outline) }
             }
 
             fits.addAll(possibleFits)

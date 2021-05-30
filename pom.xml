@@ -11,6 +11,7 @@
   <modules>
     <module>dgen-core</module>
     <module>dgen-visuals</module>
+      <module>dgen-spigot</module>
   </modules>
 
   <properties>

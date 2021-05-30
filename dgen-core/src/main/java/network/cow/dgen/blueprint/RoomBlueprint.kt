@@ -42,19 +42,43 @@ abstract class RoomBlueprint(
         if (!passagesNotAdjacent) throw IllegalArgumentException("Two passage points can not be adjacent.")
     }
 
+    /**
+     * Rotates the blueprint and its outline and passage points
+     * [degrees]° around the origin [Vector2D.ZERO].
+     *
+     * Default for mathematic operations is counterclockwise, but
+     * clockwise is more intuitive, that's why its the default.
+     */
     abstract fun rotate(degrees: Float, clockwise: Boolean = true): RoomBlueprint
 
+    /**
+     * Shifts the whole blueprint by the given vector.
+     */
     abstract fun shift(by: Vector2D): RoomBlueprint
+
+    /**
+     * Normalizes the blueprint by shifting it to the origin (0,0).
+     *
+     * That is especially useful when you want to have relative coordinates
+     * instead of absolute.
+     */
+    fun normalize() = this.shift(Vector2D.ZERO - this.outline.min)
 
     fun findAllFits(otherBlueprints: List<RoomBlueprint>, passagePoint: Vector2D): List<PossibleFit> {
         val possibleFits = mutableListOf<PossibleFit>()
         otherBlueprints.forEach {
-            possibleFits.addAll(this.findFits(it, passagePoint))
+            possibleFits.addAll(this.findFitsWith(it, passagePoint))
         }
         return possibleFits
     }
 
-    fun findFits(other: RoomBlueprint, passagePoint: Vector2D): List<PossibleFit> {
+    /**
+     * Tries out every possible combination of rotating [other] and shifting it
+     * to every [passagePoints] and returns every combination that fits.
+     * Fitting means, that other connects correctly to the passage point without intersecting
+     * any line of this blueprint.
+     */
+    fun findFitsWith(other: RoomBlueprint, passagePoint: Vector2D): List<PossibleFit> {
         val outerPoint = passagePoint.adjacentPoints().firstOrNull {
             it !in this.outline
         } ?: return emptyList()
@@ -78,9 +102,14 @@ abstract class RoomBlueprint(
         return possibleFits
     }
 
+    /**
+     * Represents a fit between this and [other], where
+     * the passage point of this with index [index] fits to other
+     * passage point [otherIndex].
+     */
     data class PossibleFit(
         val index: Int,
-        val otherIndex: Int, val blueprint: RoomBlueprint
+        val otherIndex: Int, val other: RoomBlueprint
     )
 
 }

@@ -1,8 +1,8 @@
 package network.cow.dgen.generator
 
-import network.cow.dgen.DungeonRoom
 import network.cow.dgen.blueprint.RoomBlueprint
 import network.cow.dgen.blueprint.SpawnRoomBlueprint
+import kotlin.random.Random
 
 /**
  * @author Tobias Büser
@@ -12,6 +12,8 @@ abstract class DungeonGenerator(
     val blueprints: List<RoomBlueprint>,
     val options: Options
 ) {
+
+    val random = Random(seed)
 
     init {
         if (options.numberOfRooms > 2) {
@@ -29,7 +31,7 @@ abstract class DungeonGenerator(
         }
     }
 
-    abstract fun generate(): List<DungeonRoom>
+    abstract fun generate(): List<network.cow.dgen.DungeonRoom>
 
     /**
      * Calculate, if we can reach the [Options.numberOfRooms].

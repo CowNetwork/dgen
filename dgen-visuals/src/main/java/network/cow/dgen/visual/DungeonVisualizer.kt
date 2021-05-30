@@ -1,106 +1,103 @@
 package network.cow.dgen.visual
 
-import network.cow.dgen.DungeonFinalRoom
-import network.cow.dgen.DungeonNormalRoom
 import network.cow.dgen.DungeonRoom
-import network.cow.dgen.DungeonSpawnRoom
 import network.cow.dgen.blueprint.FinalRoomBlueprint
-import network.cow.dgen.blueprint.NormalRoomBlueprint
+import network.cow.dgen.blueprint.RoomBlueprint
 import network.cow.dgen.blueprint.SpawnRoomBlueprint
 import network.cow.dgen.math.Vector2D
+import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
-import java.awt.Graphics
 import java.awt.Graphics2D
-import javax.swing.JComponent
+import java.awt.image.BufferedImage
+import javax.swing.ImageIcon
+import javax.swing.JFrame
+import javax.swing.JLabel
+import javax.swing.JScrollPane
+import javax.swing.WindowConstants
 
 
 /**
+ * Creates a [JFrame] to display a dungeon in.
+ * Uses a [JScrollPane] to make it viewable, even if the width
+ * and length of the dungeon would exceed that of the computer
+ * screen.
+ *
  * @author Tobias Büser
  */
-class DungeonVisualizer(private vararg val rooms: DungeonRoom) : JComponent() {
+class DungeonVisualizer(private vararg val rooms: DungeonRoom) : JFrame() {
+
+    companion object {
+        private val SPAWN_ROOM_OUTLINE_COLOR = Color(255, 105, 105)
+        private val SPAWN_ROOM_VERTICES_COLOR = Color(209, 84, 84)
+
+        private val NORMAL_ROOM_OUTLINE_COLOR = Color(66, 135, 245)
+        private val NORMAL_ROOM_VERTICES_COLOR = Color(56, 114, 207)
+
+        private val FINAL_ROOM_OUTLINE_COLOR = Color(155, 235, 52)
+        private val FINAL_ROOM_VERTICES_COLOR = Color(136, 207, 45)
+
+        private val PASSAGE_POINTS_COLOR = Color(62, 250, 250)
+
+        private val BOUNDING_BOX_COLOR = Color(0.62f, 0.62f, 0.62f, 0.1f)
+    }
 
     init {
+        this.title = "Dungeon Visualizer"
+        this.preferredSize = Dimension(800, 600)
+        this.defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
+
+        val image = createImage()
+        val scrollPane = JScrollPane(JLabel(ImageIcon(image)))
+        scrollPane.verticalScrollBar.unitIncrement = 32
+        scrollPane.horizontalScrollBar.unitIncrement = 32
+        scrollPane.preferredSize = this.preferredSize
+        this.iconImage = image
+
+        this.add(scrollPane, BorderLayout.CENTER)
+        this.pack()
+    }
+
+    private fun createImage(): BufferedImage {
         val maxX = rooms.maxOf { it.blueprint.outline.max.x }
         val maxY = rooms.maxOf { it.blueprint.outline.max.y }
 
         val minX = rooms.minOf { it.blueprint.outline.min.x }
         val minY = rooms.minOf { it.blueprint.outline.min.y }
 
-        this.preferredSize = Dimension(600, 600)
+        val image = BufferedImage((maxX - minX + 11).toInt() * 5, (maxY - minY + 11).toInt() * 5, BufferedImage.TYPE_INT_ARGB)
+        val graphics = image.createGraphics()
+        this.paintComponent(graphics)
+
+        return image
     }
 
-    override fun paintComponent(g: Graphics) {
-        super.paintComponent(g)
-        val graphics = g as Graphics2D
-
-        g.background = Color.white
-        /*graphics.color = Color.white
-        graphics.fillRect(0, 0, width, height)*/
-
-        graphics.translate(10, 10)
+    private fun paintComponent(graphics: Graphics2D) {
+        graphics.background = Color.white
+        graphics.translate(10, 15)
         graphics.scale(5.0, 5.0)
 
         val minX = rooms.minOf { it.blueprint.outline.min.x }
         val minY = rooms.minOf { it.blueprint.outline.min.y }
         val min = Vector2D(minX, minY)
+        val distance = Vector2D.ZERO - min
 
-        val translatedRooms: List<DungeonRoom> = rooms.map { connectedRoom ->
-            when (val blueprint = connectedRoom.blueprint) {
-                is SpawnRoomBlueprint -> {
-                    DungeonSpawnRoom(
-                        connectedRoom.id,
-                        connectedRoom.depth,
-                        SpawnRoomBlueprint(
-                            connectedRoom.blueprint.name,
-                            blueprint.outline + (Vector2D.NULL - min),
-                            blueprint.passagePoints.map { it + (Vector2D.NULL - min) },
-                            spawnPosition = blueprint.spawnPosition + (Vector2D.NULL - min)
-                        )
-                    )
-                }
-                is FinalRoomBlueprint -> {
-                    DungeonFinalRoom(
-                        connectedRoom.id,
-                        connectedRoom.depth,
-                        FinalRoomBlueprint(
-                            blueprint.name,
-                            blueprint.outline + (Vector2D.NULL - min),
-                            blueprint.passagePoints.map { it + (Vector2D.NULL - min) },
-                            stairsPosition = blueprint.stairsPosition + (Vector2D.NULL - min)
-                        ),
-                        connectedRoom.passages
-                    )
-                }
-                else -> {
-                    DungeonNormalRoom(
-                        connectedRoom.id,
-                        connectedRoom.depth,
-                        NormalRoomBlueprint(
-                            blueprint.name,
-                            blueprint.outline + (Vector2D.NULL - min),
-                            blueprint.passagePoints.map { it + (Vector2D.NULL - min) }
-                        ),
-                        connectedRoom.passages
-                    )
-                }
-            }
+        val translatedRooms: List<RoomBlueprint> = rooms.map { connectedRoom ->
+            connectedRoom.blueprint.shift(distance)
         }
-        translatedRooms.forEach { this.paintRoom(it, graphics) }
+        translatedRooms.forEach { this.paintRoomBlueprint(it, graphics) }
     }
 
-    private fun paintRoom(room: DungeonRoom, graphics: Graphics2D) {
-        val blueprint = room.blueprint
-
+    private fun paintRoomBlueprint(blueprint: RoomBlueprint, graphics: Graphics2D) {
         when (blueprint) {
             is SpawnRoomBlueprint -> {
-                graphics.color = Color(255, 105, 105)
+                graphics.color = SPAWN_ROOM_OUTLINE_COLOR
             }
             is FinalRoomBlueprint -> {
-                graphics.color = Color(155, 235, 52)
+                graphics.color = FINAL_ROOM_OUTLINE_COLOR
             }
             else -> {
-                graphics.color = Color(66, 135, 245)
+                graphics.color = NORMAL_ROOM_OUTLINE_COLOR
             }
         }
         blueprint.outline.sides.forEach {
@@ -109,26 +106,26 @@ class DungeonVisualizer(private vararg val rooms: DungeonRoom) : JComponent() {
 
         when (blueprint) {
             is SpawnRoomBlueprint -> {
-                graphics.color = Color(209, 84, 84)
+                graphics.color = SPAWN_ROOM_VERTICES_COLOR
             }
             is FinalRoomBlueprint -> {
-                graphics.color = Color(136, 207, 45)
+                graphics.color = FINAL_ROOM_VERTICES_COLOR
             }
             else -> {
-                graphics.color = Color(56, 114, 207)
+                graphics.color = NORMAL_ROOM_VERTICES_COLOR
             }
         }
         blueprint.outline.vertices.forEach {
             graphics.drawLine(it.x.toInt(), it.y.toInt(), it.x.toInt(), it.y.toInt())
         }
 
-        graphics.paint = Color(0.62f, 0.62f, 0.62f, 0.1f)
+        graphics.paint = BOUNDING_BOX_COLOR
         graphics.drawRect(
             blueprint.outline.min.x.toInt() - 1, blueprint.outline.min.y.toInt() - 1,
             blueprint.outline.length.toInt() + 2, blueprint.outline.width.toInt() + 2
         )
 
-        graphics.color = Color(62, 250, 250)
+        graphics.color = PASSAGE_POINTS_COLOR
         blueprint.passagePoints.forEach {
             graphics.drawLine(it.x.toInt(), it.y.toInt(), it.x.toInt(), it.y.toInt())
         }

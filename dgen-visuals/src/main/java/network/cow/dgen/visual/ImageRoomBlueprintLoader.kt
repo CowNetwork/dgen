@@ -71,7 +71,7 @@ class ImageRoomBlueprintLoader(private val image: BufferedImage, private val gri
         val copy = vertices.toMutableList()
         val sortedVertices = mutableListOf<Vector2D>()
 
-        var current = copy.minByOrNull { (Vector2D.NULL - it).magnitude }!!
+        var current = copy.minByOrNull { (Vector2D.ZERO - it).magnitude }!!
         while (sortedVertices.size < vertices.size) {
             sortedVertices.add(current)
             copy.remove(current)

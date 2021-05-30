@@ -9,17 +9,16 @@ import javax.swing.JComponent
 /**
  * @author Tobias Büser
  */
-class SpriteVisualizer(private val image: BufferedImage) : JComponent() {
+class ImageVisualizer(private val image: BufferedImage) : JComponent() {
 
     init {
-        this.preferredSize = Dimension(128, 128)
+        this.preferredSize = Dimension(image.width, image.height)
     }
 
     override fun paintComponent(g: Graphics) {
         val graphics = g as Graphics2D
 
-        graphics.scale(7.0, 7.0)
-        graphics.drawImage(image, 0, 0, image.width, image.height, null)
+        graphics.drawImage(image, 0, 0, null)
         graphics.dispose()
     }
 

@@ -9,7 +9,7 @@ import kotlin.math.sqrt
 open class Vector2D(val x: Double, val y: Double) {
 
     companion object {
-        val NULL = Vector2D(0.0, 0.0)
+        val ZERO = Vector2D(0.0, 0.0)
     }
 
     val magnitude = sqrt(this.x * this.x + this.y * this.y)
