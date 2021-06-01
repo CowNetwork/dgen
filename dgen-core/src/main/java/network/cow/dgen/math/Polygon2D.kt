@@ -3,7 +3,7 @@ package network.cow.dgen.math
 /**
  * @author Tobias Büser
  */
-open class Polygon2D(val vertices: List<Vector2D>) {
+class Polygon2D(val vertices: List<Vector2D>) {
 
     val min = Vector2D(vertices.minOf { it.x }, vertices.minOf { it.y })
     val max = Vector2D(vertices.maxOf { it.x }, vertices.maxOf { it.y })

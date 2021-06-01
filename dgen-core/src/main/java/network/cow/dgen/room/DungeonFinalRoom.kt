@@ -1,6 +1,6 @@
-package network.cow.dgen
+package network.cow.dgen.room
 
-import network.cow.dgen.blueprint.FinalRoomBlueprint
+import network.cow.dgen.DungeonRoom
 
 /**
  * @author Tobias Büser
@@ -8,5 +8,5 @@ import network.cow.dgen.blueprint.FinalRoomBlueprint
 class DungeonFinalRoom(
     override val id: String, override val depth: Int,
     override val blueprint: FinalRoomBlueprint,
-    override val passages: MutableMap<Int, String?> = mutableMapOf()
+    override val doors: MutableMap<Int, String?> = mutableMapOf()
 ) : DungeonRoom

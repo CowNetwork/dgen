@@ -3,6 +3,9 @@ package network.cow.dgen.math
 import kotlin.math.cos
 import kotlin.math.sin
 
+internal const val MAX_ROTATION = 360
+internal val ROTATION_DEGREES = listOf(0f, 90f, 180f, 270f)
+
 internal fun betterCos(degree: Double): Double {
     if (degree < 0) return -1 * betterCos(degree * -1)
     return when (degree % 360) {

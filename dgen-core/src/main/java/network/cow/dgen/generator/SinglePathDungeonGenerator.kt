@@ -1,14 +1,16 @@
 package network.cow.dgen.generator
 
-import network.cow.dgen.DungeonFinalRoom
-import network.cow.dgen.DungeonNormalRoom
 import network.cow.dgen.DungeonRoom
-import network.cow.dgen.DungeonSpawnRoom
-import network.cow.dgen.blueprint.FinalRoomBlueprint
-import network.cow.dgen.blueprint.NormalRoomBlueprint
+import network.cow.dgen.blueprint.PossibleFit
 import network.cow.dgen.blueprint.RoomBlueprint
-import network.cow.dgen.blueprint.SpawnRoomBlueprint
+import network.cow.dgen.blueprint.findAllFits
 import network.cow.dgen.generateHex
+import network.cow.dgen.room.DungeonFinalRoom
+import network.cow.dgen.room.DungeonNormalRoom
+import network.cow.dgen.room.DungeonSpawnRoom
+import network.cow.dgen.room.FinalRoomBlueprint
+import network.cow.dgen.room.NormalRoomBlueprint
+import network.cow.dgen.room.SpawnRoomBlueprint
 
 /**
  * This generator works by just attaching one room to another to form a
@@ -105,7 +107,7 @@ class SinglePathDungeonGenerator(
 
         // add a room with pp>=2
         val newRoomFit = possibleFits.filter { it.other is NormalRoomBlueprint }
-            .filter { it.other.passagePoints.size >= 2 }
+            .filter { it.other.doors.size >= 2 }
             .randomOrNull(random) ?: return emptyList()
 
         val newRoom = DungeonNormalRoom(
@@ -122,17 +124,18 @@ class SinglePathDungeonGenerator(
         room: DungeonRoom, passageIndex: Int,
         otherPassageIndex: Int, otherRoom: DungeonRoom
     ) {
-        room.passages[passageIndex] = otherRoom.id
-        otherRoom.passages[otherPassageIndex] = room.id
+        // TODO
+        /*room.doors[passageIndex] = otherRoom.id
+        otherRoom.doors[otherPassageIndex] = room.id*/
     }
 
     private fun findAllFits(
         room: DungeonRoom,
         generatedRooms: MutableMap<String, DungeonRoom>
-    ): List<RoomBlueprint.PossibleFit> {
-        val fits = mutableListOf<RoomBlueprint.PossibleFit>()
+    ): List<PossibleFit> {
+        val fits = mutableListOf<PossibleFit>()
 
-        room.blueprint.passagePoints.forEach { passagePoint ->
+        room.blueprint.doors.forEach { passagePoint ->
             // find possible room for this passage
             val rawFits = room.blueprint.findAllFits(blueprints, passagePoint).filter { it.other !is SpawnRoomBlueprint }
             val possibleFits = rawFits.filter { fit ->

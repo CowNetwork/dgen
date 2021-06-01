@@ -5,8 +5,8 @@ package network.cow.dgen.math
  */
 class Line2D(val start: Vector2D, val end: Vector2D) {
 
-    val max = Vector2D(maxOf(start.x, end.x), maxOf(start.y, end.y))
-    val min = Vector2D(minOf(start.x, end.x), minOf(start.y, end.y))
+    private val max = Vector2D(maxOf(start.x, end.x), maxOf(start.y, end.y))
+    private val min = Vector2D(minOf(start.x, end.x), minOf(start.y, end.y))
 
     val isVertical = (start.x - end.x) == 0.0
     val isHorizontal = (start.y - end.y) == 0.0
@@ -25,6 +25,5 @@ class Line2D(val start: Vector2D, val end: Vector2D) {
     override fun toString(): String {
         return "Line2D(start=$start, end=$end)"
     }
-
 
 }

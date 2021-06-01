@@ -1,25 +1,37 @@
 package network.cow.dgen.blueprint
 
+import network.cow.dgen.math.MAX_ROTATION
 import network.cow.dgen.math.Polygon2D
 import network.cow.dgen.math.Vector2D
 
 /**
+ * A blueprint for defining a dungeon room.
+ *
+ * Note that we only support 2D shapes here, i.e. every outline
+ * and passage points are on the same level.
+ *
+ * @property name Human readable identifier for this blueprint. Choose a name, that
+ * best describes how the blueprint looks like, without looking at the actual form.
+ * @property outline The outline is a polygon consisting of the vertices defining
+ * the outer shape of the room.
+ * @property doors Vectors on the outline specifying the points that can
+ * connect to other room blueprints.
+ * @property rotation Current clockwise rotation in degrees of this blueprint. To get the
+ * origin blueprint, rotate it by -[rotation].
+ *
  * @author Tobias Büser
  */
 abstract class RoomBlueprint(
-    val name: String, val outline: Polygon2D,
-    val passagePoints: List<Vector2D>, rotation: Float = 0f
+    val name: String,
+    val outline: Polygon2D,
+    val doors: List<Vector2D>,
+    rotation: Float = 0f
 ) {
 
     val rotation = rotation; get() = field % MAX_ROTATION
 
-    companion object {
-        private const val MAX_ROTATION = 360
-        private val ROTATION_DEGREES = listOf(0f, 90f, 180f, 270f)
-    }
-
     init {
-        if (passagePoints.isEmpty()) throw IllegalArgumentException("A room should always contain a passage point.")
+        if (doors.isEmpty()) throw IllegalArgumentException("A room should always contain a door.")
 
         val noDuplicates = this.outline.vertices.all {
             this.outline.vertices.count { other -> it == other } == 1
@@ -31,19 +43,19 @@ abstract class RoomBlueprint(
         }
         if (!straightLines) throw IllegalArgumentException("The vertices need to form only straight lines.")
 
-        val passagesOnOutline = this.passagePoints.all {
+        val doorsOnOutline = this.doors.all {
             this.outline.sides.count { side -> it in side } == 1
         }
-        if (!passagesOnOutline) throw IllegalArgumentException("All passage points need to be exactly on one side of the outline.")
+        if (!doorsOnOutline) throw IllegalArgumentException("All doors need to be exactly on one side of the outline.")
 
-        val passagesNotAdjacent = this.passagePoints.all {
-            !passagePoints.any { other -> it != other && it.isNextTo(other) }
+        val doorsNotAdjacent = this.doors.all {
+            !doors.any { other -> it != other && it.isNextTo(other) }
         }
-        if (!passagesNotAdjacent) throw IllegalArgumentException("Two passage points can not be adjacent.")
+        if (!doorsNotAdjacent) throw IllegalArgumentException("Two doors can not be adjacent.")
     }
 
     /**
-     * Rotates the blueprint and its outline and passage points
+     * Rotates the blueprint and its outline and doors
      * [degrees]° around the origin [Vector2D.ZERO].
      *
      * Default for mathematic operations is counterclockwise, but
@@ -63,53 +75,5 @@ abstract class RoomBlueprint(
      * instead of absolute.
      */
     fun normalize() = this.shift(Vector2D.ZERO - this.outline.min)
-
-    fun findAllFits(otherBlueprints: List<RoomBlueprint>, passagePoint: Vector2D): List<PossibleFit> {
-        val possibleFits = mutableListOf<PossibleFit>()
-        otherBlueprints.forEach {
-            possibleFits.addAll(this.findFitsWith(it, passagePoint))
-        }
-        return possibleFits
-    }
-
-    /**
-     * Tries out every possible combination of rotating [other] and shifting it
-     * to every [passagePoints] and returns every combination that fits.
-     * Fitting means, that other connects correctly to the passage point without intersecting
-     * any line of this blueprint.
-     */
-    fun findFitsWith(other: RoomBlueprint, passagePoint: Vector2D): List<PossibleFit> {
-        val outerPoint = passagePoint.adjacentPoints().firstOrNull {
-            it !in this.outline
-        } ?: return emptyList()
-
-        val passageIndex = this.passagePoints.indexOf(passagePoint)
-        val possibleFits = mutableListOf<PossibleFit>()
-
-        ROTATION_DEGREES.forEach { degrees ->
-            val otherRotated = other.rotate(degrees, true)
-
-            otherRotated.passagePoints.forEachIndexed { index, otherPassage ->
-                // move other to passage point, so that otherPassage is exactly next to passagePoint
-                val distance = outerPoint - otherPassage
-                val otherShifted = otherRotated.shift(distance)
-
-                if (!this.outline.overlapsWith(otherShifted.outline)) {
-                    possibleFits.add(PossibleFit(passageIndex, index, otherShifted))
-                }
-            }
-        }
-        return possibleFits
-    }
-
-    /**
-     * Represents a fit between this and [other], where
-     * the passage point of this with index [index] fits to other
-     * passage point [otherIndex].
-     */
-    data class PossibleFit(
-        val index: Int,
-        val otherIndex: Int, val other: RoomBlueprint
-    )
 
 }

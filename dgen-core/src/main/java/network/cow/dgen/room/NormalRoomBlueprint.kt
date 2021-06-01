@@ -1,5 +1,6 @@
-package network.cow.dgen.blueprint
+package network.cow.dgen.room
 
+import network.cow.dgen.blueprint.RoomBlueprint
 import network.cow.dgen.math.Polygon2D
 import network.cow.dgen.math.Vector2D
 
@@ -18,7 +19,7 @@ open class NormalRoomBlueprint(
         return NormalRoomBlueprint(
             this.name,
             rotatedOutline,
-            passagePoints.map { it.rotate(degrees.toDouble(), clockwise) },
+            doors.map { it.rotate(degrees.toDouble(), clockwise) },
             this.rotation + degrees
         )
     }
@@ -27,7 +28,7 @@ open class NormalRoomBlueprint(
         return NormalRoomBlueprint(
             this.name,
             this.outline + by,
-            this.passagePoints.map { it + by },
+            this.doors.map { it + by },
             this.rotation
         )
     }

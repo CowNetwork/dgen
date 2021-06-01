@@ -1,6 +1,5 @@
 package network.cow.dgen.math
 
-import kotlin.math.pow
 import kotlin.math.sqrt
 
 /**
@@ -12,6 +11,10 @@ open class Vector2D(val x: Double, val y: Double) {
         val ZERO = Vector2D(0.0, 0.0)
     }
 
+    /**
+     * Represents the magnitude of this vector, which is commonly
+     * known as the length in euclidian spaces.
+     */
     val magnitude = sqrt(this.x * this.x + this.y * this.y)
 
     operator fun plus(other: Vector2D) = Vector2D(this.x + other.x, this.y + other.y)
@@ -26,8 +29,14 @@ open class Vector2D(val x: Double, val y: Double) {
     operator fun div(other: Vector2D) = Vector2D(this.x / other.x, this.y / other.y)
     operator fun div(value: Double) = Vector2D(this.x / value, this.y / value)
 
+    /**
+     * Rotates this vector by [degrees].
+     *
+     * If clockwise, we subtract the [degrees] from [MAX_ROTATION]
+     * because the default direction is counterclockwise.
+     */
     fun rotate(degrees: Double, clockwise: Boolean = false): Vector2D {
-        val theta = if (clockwise) 360 - degrees else degrees
+        val theta = if (clockwise) MAX_ROTATION - degrees else degrees
 
         return Vector2D(
             this.x * betterCos(theta) - this.y * betterSin(theta),
@@ -35,9 +44,20 @@ open class Vector2D(val x: Double, val y: Double) {
         )
     }
 
-    fun distanceTo(other: Vector2D) = sqrt((this.x - other.x).pow(2) + (this.y - other.y).pow(2))
+    /**
+     * Returns the euclidean distance between this and [other].
+     */
+    fun distanceTo(other: Vector2D) = (this - other).magnitude
+
+    /**
+     * Checks if vector [other] is in distance <= [delta] to this.
+     */
     fun isNextTo(other: Vector2D, delta: Double = 1.0) = this.distanceTo(other) <= delta
 
+    /**
+     * Returns a list of all vectors, that are exactly at a [offset]
+     * distance to this vector, but only horizontally/vertically.
+     */
     fun adjacentPoints(offset: Double = 1.0): List<Vector2D> {
         return listOf(
             Vector2D(this.x + offset, this.y),

@@ -1,10 +1,10 @@
 package network.cow.dgen.visual
 
 import network.cow.dgen.DungeonRoom
-import network.cow.dgen.blueprint.FinalRoomBlueprint
 import network.cow.dgen.blueprint.RoomBlueprint
-import network.cow.dgen.blueprint.SpawnRoomBlueprint
 import network.cow.dgen.math.Vector2D
+import network.cow.dgen.room.FinalRoomBlueprint
+import network.cow.dgen.room.SpawnRoomBlueprint
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -126,7 +126,7 @@ class DungeonVisualizer(private vararg val rooms: DungeonRoom) : JFrame() {
         )
 
         graphics.color = PASSAGE_POINTS_COLOR
-        blueprint.passagePoints.forEach {
+        blueprint.doors.forEach {
             graphics.drawLine(it.x.toInt(), it.y.toInt(), it.x.toInt(), it.y.toInt())
         }
     }

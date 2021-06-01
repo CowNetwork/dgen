@@ -1,7 +1,8 @@
 package network.cow.dgen.generator
 
+import network.cow.dgen.DungeonRoom
 import network.cow.dgen.blueprint.RoomBlueprint
-import network.cow.dgen.blueprint.SpawnRoomBlueprint
+import network.cow.dgen.room.SpawnRoomBlueprint
 import kotlin.random.Random
 
 /**
@@ -17,11 +18,11 @@ abstract class DungeonGenerator(
 
     init {
         if (options.numberOfRooms > 2) {
-            val singlePassageRoomCount = blueprints.filter { it.passagePoints.size == 1 }.count()
-            val multiPassageRoomCount = blueprints.filter { it.passagePoints.size >= 2 }.count()
+            val singleDoorRoomCount = blueprints.filter { it.doors.size == 1 }.count()
+            val multiDoorRoomCount = blueprints.filter { it.doors.size >= 2 }.count()
 
-            if (singlePassageRoomCount == 0 || multiPassageRoomCount == 0) {
-                throw IllegalArgumentException("For that number of rooms, you need at least one single- and one multi-passage room blueprint.")
+            if (singleDoorRoomCount == 0 || multiDoorRoomCount == 0) {
+                throw IllegalArgumentException("For that number of rooms, you need at least one single- and one multi-door room blueprint.")
             }
         }
 
@@ -31,17 +32,17 @@ abstract class DungeonGenerator(
         }
     }
 
-    abstract fun generate(): List<network.cow.dgen.DungeonRoom>
+    abstract fun generate(): List<DungeonRoom>
 
     /**
      * Calculate, if we can reach the [Options.numberOfRooms].
-     * - If there are rooms with pp>=2, we can easily reach numberOfRooms
-     * - If there are only rooms with pp=1, we can only reach numberOfRooms=pp(spawnRoom)
+     * - If there are rooms with d>=2, we can easily reach numberOfRooms
+     * - If there are only rooms with d=1, we can only reach numberOfRooms=d(spawnRoom)
      */
     private fun calculatePossibleNumberOfRooms(): Int {
-        if (blueprints.filter { it.passagePoints.size >= 2 }.count() > 0)
+        if (blueprints.filter { it.doors.size >= 2 }.count() > 0)
             return options.numberOfRooms
-        return blueprints.filterIsInstance<SpawnRoomBlueprint>().maxOf { it.passagePoints.size }
+        return blueprints.filterIsInstance<SpawnRoomBlueprint>().maxOf { it.doors.size }
     }
 
     data class Options(val numberOfRooms: Int, val maximumRoomDistance: Int) {

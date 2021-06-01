@@ -1,0 +1,9 @@
+name: Dgen
+version: ${project.version}
+main: network.cow.dgen.spigot.DgenPlugin
+author: Tobias B.
+api-version: 1.16
+depend: [WorldEdit]
+
+commands:
+  gen:

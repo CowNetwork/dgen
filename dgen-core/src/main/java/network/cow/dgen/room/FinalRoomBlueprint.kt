@@ -1,40 +1,42 @@
-package network.cow.dgen.blueprint
+package network.cow.dgen.room
 
+import network.cow.dgen.blueprint.RoomBlueprint
 import network.cow.dgen.math.Polygon2D
 import network.cow.dgen.math.Vector2D
 
 /**
  * @author Tobias Büser
  */
-class SpawnRoomBlueprint(
+class FinalRoomBlueprint(
     name: String, outline: Polygon2D,
     passagePoints: List<Vector2D>, rotation: Float = 0f,
-    val spawnPosition: Vector2D
+    val stairsPosition: Vector2D
 ) : RoomBlueprint(name, outline, passagePoints, rotation) {
 
     init {
-        if (spawnPosition !in outline) throw IllegalArgumentException("The spawnPosition needs to be in the outline.")
+        if (stairsPosition !in outline) throw IllegalArgumentException("The stairsPosition needs to be in the outline.")
     }
 
+    // TODO nicer, so that we dont have to rotate the other stuff as well.
     override fun rotate(degrees: Float, clockwise: Boolean): RoomBlueprint {
         val rotatedOutline = this.outline.rotate(degrees.toDouble(), clockwise)
 
-        return SpawnRoomBlueprint(
+        return FinalRoomBlueprint(
             this.name,
             rotatedOutline,
-            passagePoints.map { it.rotate(degrees.toDouble(), clockwise) },
+            doors.map { it.rotate(degrees.toDouble(), clockwise) },
             this.rotation + degrees,
-            spawnPosition.rotate(degrees.toDouble(), clockwise)
+            stairsPosition.rotate(degrees.toDouble(), clockwise)
         )
     }
 
     override fun shift(by: Vector2D): RoomBlueprint {
-        return SpawnRoomBlueprint(
+        return FinalRoomBlueprint(
             this.name,
             this.outline + by,
-            this.passagePoints.map { it + by },
+            this.doors.map { it + by },
             this.rotation,
-            this.spawnPosition + by
+            this.stairsPosition + by
         )
     }
 
