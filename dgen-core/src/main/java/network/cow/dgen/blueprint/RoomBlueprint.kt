@@ -1,6 +1,7 @@
 package network.cow.dgen.blueprint
 
-import network.cow.dgen.math.MAX_ROTATION
+import network.cow.dgen.math.MathHelpers.MAX_ROTATION
+import network.cow.dgen.math.Orientation
 import network.cow.dgen.math.Polygon2D
 import network.cow.dgen.math.Vector2D
 
@@ -9,6 +10,7 @@ import network.cow.dgen.math.Vector2D
  *
  * Note that we only support 2D shapes here, i.e. every outline
  * and passage points are on the same level.
+ * Also, we check the blueprint's integrity when initializing.
  *
  * @property name Human readable identifier for this blueprint. Choose a name, that
  * best describes how the blueprint looks like, without looking at the actual form.
@@ -21,7 +23,7 @@ import network.cow.dgen.math.Vector2D
  *
  * @author Tobias Büser
  */
-abstract class RoomBlueprint(
+open class RoomBlueprint(
     val name: String,
     val outline: Polygon2D,
     val doors: List<Vector2D>,
@@ -32,19 +34,21 @@ abstract class RoomBlueprint(
 
     init {
         if (doors.isEmpty()) throw IllegalArgumentException("A room should always contain a door.")
+        if (this.outline.vertices.size < 4) throw IllegalArgumentException("The outline needs to have at least 4 vertices.")
+        if (this.outline.orientation != Orientation.CLOCKWISE) throw IllegalArgumentException("The outline's vertices need to be in clockwise order.")
 
         val noDuplicates = this.outline.vertices.all {
             this.outline.vertices.count { other -> it == other } == 1
         }
         if (!noDuplicates) throw IllegalArgumentException("All vertices have to be unique.")
 
-        val straightLines = this.outline.sides.all {
+        val straightLines = this.outline.edges.all {
             it.isVertical || it.isHorizontal
         }
         if (!straightLines) throw IllegalArgumentException("The vertices need to form only straight lines.")
 
         val doorsOnOutline = this.doors.all {
-            this.outline.sides.count { side -> it in side } == 1
+            this.outline.edges.count { side -> it in side } == 1
         }
         if (!doorsOnOutline) throw IllegalArgumentException("All doors need to be exactly on one side of the outline.")
 
@@ -61,12 +65,28 @@ abstract class RoomBlueprint(
      * Default for mathematic operations is counterclockwise, but
      * clockwise is more intuitive, that's why its the default.
      */
-    abstract fun rotate(degrees: Float, clockwise: Boolean = true): RoomBlueprint
+    fun rotate(degrees: Float): RoomBlueprint {
+        val rotatedOutline = this.outline.rotate(degrees.toDouble())
+
+        return RoomBlueprint(
+            this.name,
+            rotatedOutline,
+            doors.map { it.rotate(degrees.toDouble()) },
+            this.rotation + degrees
+        )
+    }
 
     /**
      * Shifts the whole blueprint by the given vector.
      */
-    abstract fun shift(by: Vector2D): RoomBlueprint
+    fun shift(by: Vector2D): RoomBlueprint {
+        return RoomBlueprint(
+            this.name,
+            this.outline + by,
+            this.doors.map { it + by },
+            this.rotation
+        )
+    }
 
     /**
      * Normalizes the blueprint by shifting it to the origin (0,0).

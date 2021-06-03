@@ -108,7 +108,7 @@ class DgenPlugin : JavaPlugin(), CommandExecutor {
 
             // the position where the other room will move to, so that
             // the other passage point is exactly on this position
-            val targetPoint = passage.adjacentPoints(1.0).first { it !in blueprint.outline }
+            val targetPoint = passage.adjacentVectors(1.0).first { it !in blueprint.outline }
 
             // the room we want to connect to the target point
             val newRoom = map[id]!!

@@ -7,6 +7,6 @@ import network.cow.dgen.DungeonRoom
  */
 class DungeonSpawnRoom(
     override val id: String, override val depth: Int,
-    override val blueprint: SpawnRoomBlueprint,
-    override val doors: MutableMap<Int, String?> = mutableMapOf()
-) : DungeonRoom
+    override val blueprint: SpawnRoomBlueprint, override val doors: Map<Int, String?> = mutableMapOf()
+) : DungeonRoom {
+}

@@ -100,7 +100,7 @@ class DungeonVisualizer(private vararg val rooms: DungeonRoom) : JFrame() {
                 graphics.color = NORMAL_ROOM_OUTLINE_COLOR
             }
         }
-        blueprint.outline.sides.forEach {
+        blueprint.outline.edges.forEach {
             graphics.drawLine(it.start.x.toInt(), it.start.y.toInt(), it.end.x.toInt(), it.end.y.toInt())
         }
 

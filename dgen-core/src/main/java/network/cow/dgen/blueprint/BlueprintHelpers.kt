@@ -1,6 +1,6 @@
 package network.cow.dgen.blueprint
 
-import network.cow.dgen.math.ROTATION_DEGREES
+import network.cow.dgen.math.MathHelpers.ROTATION_DEGREES
 import network.cow.dgen.math.Vector2D
 
 // TODO same as below.
@@ -24,7 +24,7 @@ fun RoomBlueprint.findAllFits(otherBlueprints: List<RoomBlueprint>, passagePoint
  * TODO this kind of logic shouldnt be in `RoomBlueprint`
  */
 fun RoomBlueprint.findFitsWith(other: RoomBlueprint, door: Vector2D): List<PossibleFit> {
-    val outerPoint = door.adjacentPoints().firstOrNull {
+    val outerPoint = door.adjacentVectors().firstOrNull {
         it !in this.outline
     } ?: return emptyList()
 
@@ -32,7 +32,7 @@ fun RoomBlueprint.findFitsWith(other: RoomBlueprint, door: Vector2D): List<Possi
     val possibleFits = mutableListOf<PossibleFit>()
 
     ROTATION_DEGREES.forEach { degrees ->
-        val otherRotated = other.rotate(degrees, true)
+        val otherRotated = other.rotate(degrees)
 
         otherRotated.doors.forEachIndexed { index, otherPassage ->
             // move other to passage point, so that otherPassage is exactly next to passagePoint

@@ -5,11 +5,11 @@ import network.cow.dgen.blueprint.PossibleFit
 import network.cow.dgen.blueprint.RoomBlueprint
 import network.cow.dgen.blueprint.findAllFits
 import network.cow.dgen.generateHex
+import network.cow.dgen.room.DungeonEmptyRoom
 import network.cow.dgen.room.DungeonFinalRoom
-import network.cow.dgen.room.DungeonNormalRoom
 import network.cow.dgen.room.DungeonSpawnRoom
+import network.cow.dgen.room.EmptyRoomBlueprint
 import network.cow.dgen.room.FinalRoomBlueprint
-import network.cow.dgen.room.NormalRoomBlueprint
 import network.cow.dgen.room.SpawnRoomBlueprint
 
 /**
@@ -106,14 +106,14 @@ class SinglePathDungeonGenerator(
         }
 
         // add a room with pp>=2
-        val newRoomFit = possibleFits.filter { it.other is NormalRoomBlueprint }
+        val newRoomFit = possibleFits.filter { it.other is EmptyRoomBlueprint }
             .filter { it.other.doors.size >= 2 }
             .randomOrNull(random) ?: return emptyList()
 
-        val newRoom = DungeonNormalRoom(
+        val newRoom = DungeonEmptyRoom(
             generateHex(8, random),
             room.depth + 1,
-            newRoomFit.other as NormalRoomBlueprint
+            newRoomFit.other
         )
         this.connect(room, newRoomFit.index, newRoomFit.otherIndex, newRoom)
         generatedRooms[newRoom.id] = newRoom

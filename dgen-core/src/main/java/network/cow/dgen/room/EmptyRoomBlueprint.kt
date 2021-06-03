@@ -7,7 +7,8 @@ import network.cow.dgen.math.Vector2D
 /**
  * @author Tobias Büser
  */
-class FinalRoomBlueprint(
+class EmptyRoomBlueprint(
     name: String, outline: Polygon2D,
     doors: List<Vector2D>, rotation: Float = 0f
-) : RoomBlueprint(name, outline, doors, rotation)
+) : RoomBlueprint(name, outline, doors, rotation) {
+}
