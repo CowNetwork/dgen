@@ -3,7 +3,7 @@ package network.cow.dgen.math
 /**
  * @author Tobias Büser
  */
-enum class Transformation {
+enum class Transform {
 
     /**
      * No changes to the base class
