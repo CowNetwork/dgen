@@ -2,7 +2,6 @@ package network.cow.dgen.generator
 
 import network.cow.dgen.DungeonRoom
 import network.cow.dgen.blueprint.RoomBlueprint
-import network.cow.dgen.room.SpawnRoomBlueprint
 import kotlin.random.Random
 
 /**
@@ -42,7 +41,8 @@ abstract class DungeonGenerator(
     private fun calculatePossibleNumberOfRooms(): Int {
         if (blueprints.filter { it.doors.size >= 2 }.count() > 0)
             return options.numberOfRooms
-        return blueprints.filterIsInstance<SpawnRoomBlueprint>().maxOf { it.doors.size }
+        /*return blueprints.filterIsInstance<SpawnRoomBlueprint>().maxOf { it.doors.size }*/
+        return 0
     }
 
     data class Options(val numberOfRooms: Int, val maximumRoomDistance: Int) {

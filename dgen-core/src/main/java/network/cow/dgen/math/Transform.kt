@@ -20,9 +20,4 @@ enum class Transformation {
      */
     MIRRORX, MIRRORY,
 
-    /**
-     * Flip the polygon diagonal from quadrant 1 to 3.
-     */
-    FLIP13, FLIP24
-
 }

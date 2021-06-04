@@ -1,14 +1,12 @@
 package network.cow.dgen.math
 
-import network.cow.dgen.math.MathHelpers.betterCos
-import network.cow.dgen.math.MathHelpers.betterSin
 import kotlin.math.abs
 import kotlin.math.sqrt
 
 /**
  * @author Tobias Büser
  */
-open class Vector2D(val x: Double, val y: Double) {
+open class Vector2D(val x: Double, val y: Double) : Transformable<Vector2D> {
 
     companion object {
         val ZERO = Vector2D(0.0, 0.0)
@@ -20,20 +18,16 @@ open class Vector2D(val x: Double, val y: Double) {
      */
     val magnitude = sqrt(this.x * this.x + this.y * this.y)
 
-    operator fun plus(other: Vector2D) = Vector2D(this.x + other.x, this.y + other.y)
-    operator fun plus(value: Double) = Vector2D(this.x + value, this.y + value)
-
-    operator fun minus(other: Vector2D) = Vector2D(this.x - other.x, this.y - other.y)
-    operator fun minus(value: Double) = Vector2D(this.x - value, this.y - value)
-
-    operator fun times(other: Vector2D) = Vector2D(this.x * other.x, this.y * other.y)
-    operator fun times(value: Double) = Vector2D(this.x * value, this.y * value)
-
-    operator fun div(other: Vector2D) = Vector2D(this.x / other.x, this.y / other.y)
-    operator fun div(value: Double) = Vector2D(this.x / value, this.y / value)
-
-    operator fun component1() = this.x
-    operator fun component2() = this.y
+    override fun transform(transform: Transform): Vector2D {
+        return when (transform) {
+            Transform.IDENTITY -> Vector2D(this.x, this.y)
+            Transform.ROTATE90 -> this.rotate(90.0)
+            Transform.ROTATE180 -> this.rotate(180.0)
+            Transform.ROTATE270 -> this.rotate(270.0)
+            Transform.MIRRORX -> Vector2D(this.x, -this.y)
+            Transform.MIRRORY -> Vector2D(-this.x, this.y)
+        }
+    }
 
     /**
      * Rotates this vector by [degrees]° clockwise.
@@ -43,19 +37,6 @@ open class Vector2D(val x: Double, val y: Double) {
             this.x * betterCos(degrees) + this.y * betterSin(degrees),
             -this.x * betterSin(degrees) + this.y * betterCos(degrees)
         )
-    }
-
-    fun transform(transformation: Transformation): Vector2D {
-        return when (transformation) {
-            Transformation.IDENTITY -> Vector2D(this.x, this.y)
-            Transformation.ROTATE90 -> this.rotate(90.0)
-            Transformation.ROTATE180 -> this.rotate(180.0)
-            Transformation.ROTATE270 -> this.rotate(270.0)
-            Transformation.MIRRORX -> Vector2D(this.x, -this.y)
-            Transformation.MIRRORY -> Vector2D(-this.x, this.y)
-            Transformation.FLIP13 -> Vector2D(this.y, this.x)
-            Transformation.FLIP24 -> Vector2D(-this.y, -this.x)
-        }
     }
 
     /**
@@ -85,6 +66,21 @@ open class Vector2D(val x: Double, val y: Double) {
             Vector2D(this.x, this.y - offset),
         )
     }
+
+    operator fun plus(other: Vector2D) = Vector2D(this.x + other.x, this.y + other.y)
+    operator fun plus(value: Double) = Vector2D(this.x + value, this.y + value)
+
+    operator fun minus(other: Vector2D) = Vector2D(this.x - other.x, this.y - other.y)
+    operator fun minus(value: Double) = Vector2D(this.x - value, this.y - value)
+
+    operator fun times(other: Vector2D) = Vector2D(this.x * other.x, this.y * other.y)
+    operator fun times(value: Double) = Vector2D(this.x * value, this.y * value)
+
+    operator fun div(other: Vector2D) = Vector2D(this.x / other.x, this.y / other.y)
+    operator fun div(value: Double) = Vector2D(this.x / value, this.y / value)
+
+    operator fun component1() = this.x
+    operator fun component2() = this.y
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

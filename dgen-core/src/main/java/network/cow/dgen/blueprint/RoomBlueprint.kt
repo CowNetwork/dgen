@@ -1,8 +1,10 @@
 package network.cow.dgen.blueprint
 
-import network.cow.dgen.math.MathHelpers.MAX_ROTATION
+import network.cow.dgen.math.MAX_ROTATION
 import network.cow.dgen.math.Orientation
 import network.cow.dgen.math.Polygon2D
+import network.cow.dgen.math.Transform
+import network.cow.dgen.math.Transformable
 import network.cow.dgen.math.Vector2D
 
 /**
@@ -27,8 +29,9 @@ open class RoomBlueprint(
     val name: String,
     val outline: Polygon2D,
     val doors: List<Vector2D>,
+    val allowedTransforms: List<Transform> = listOf(Transform.IDENTITY),
     rotation: Float = 0f
-) {
+) : Transformable<RoomBlueprint> {
 
     val rotation = rotation; get() = field % MAX_ROTATION
 
@@ -58,21 +61,17 @@ open class RoomBlueprint(
         if (!doorsNotAdjacent) throw IllegalArgumentException("Two doors can not be adjacent.")
     }
 
-    /**
-     * Rotates the blueprint and its outline and doors
-     * [degrees]° around the origin [Vector2D.ZERO].
-     *
-     * Default for mathematic operations is counterclockwise, but
-     * clockwise is more intuitive, that's why its the default.
-     */
-    fun rotate(degrees: Float): RoomBlueprint {
-        val rotatedOutline = this.outline.rotate(degrees.toDouble())
+    override fun transform(transform: Transform): RoomBlueprint {
+        if (transform !in this.allowedTransforms) {
+            return this
+        }
+        val transformedOutline = this.outline.transform(transform)
 
         return RoomBlueprint(
             this.name,
-            rotatedOutline,
-            doors.map { it.rotate(degrees.toDouble()) },
-            this.rotation + degrees
+            transformedOutline,
+            doors.map { it.transform(transform) },
+            this.allowedTransforms
         )
     }
 
@@ -84,6 +83,7 @@ open class RoomBlueprint(
             this.name,
             this.outline + by,
             this.doors.map { it + by },
+            this.allowedTransforms,
             this.rotation
         )
     }

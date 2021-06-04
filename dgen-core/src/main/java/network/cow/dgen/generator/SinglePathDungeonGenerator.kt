@@ -1,16 +1,7 @@
 package network.cow.dgen.generator
 
 import network.cow.dgen.DungeonRoom
-import network.cow.dgen.blueprint.PossibleFit
 import network.cow.dgen.blueprint.RoomBlueprint
-import network.cow.dgen.blueprint.findAllFits
-import network.cow.dgen.generateHex
-import network.cow.dgen.room.DungeonEmptyRoom
-import network.cow.dgen.room.DungeonFinalRoom
-import network.cow.dgen.room.DungeonSpawnRoom
-import network.cow.dgen.room.EmptyRoomBlueprint
-import network.cow.dgen.room.FinalRoomBlueprint
-import network.cow.dgen.room.SpawnRoomBlueprint
 
 /**
  * This generator works by just attaching one room to another to form a
@@ -29,14 +20,15 @@ class SinglePathDungeonGenerator(
     pathLength: Int
 ) : DungeonGenerator(seed, blueprints, Options(pathLength + 1, pathLength)) {
 
-    private val spawnRoomBlueprint = blueprints.filterIsInstance<SpawnRoomBlueprint>().random(random)
+    /*private val spawnRoomBlueprint = blueprints.filterIsInstance<SpawnRoomBlueprint>().random(random)
 
+    */
     /**
      * The maximum iterations has to be at least the
      * [DungeonGenerator.Options.numberOfRooms] long.
      * Everything exceeding this limit will be the dungeon trying to find a fit
      * where possibly no fit can be found.
-     */
+     *//*
     private val maxIterations = options.numberOfRooms * 2
 
     override fun generate(): List<DungeonRoom> {
@@ -68,6 +60,7 @@ class SinglePathDungeonGenerator(
         return generatedRooms.values.toList()
     }
 
+    */
     /**
      * Populates given [room] by finding a new [DungeonRoom] that can be
      * connected to it.
@@ -81,7 +74,7 @@ class SinglePathDungeonGenerator(
      * - If we have not => It has to be a [NormalRoomBlueprint] with at least 2 passage points.
      *
      * If we don't find one, we also just return an empty list.
-     */
+     *//*
     private fun populate(room: DungeonRoom, generatedRooms: MutableMap<String, DungeonRoom>): List<DungeonRoom> {
         if (generatedRooms.size == options.numberOfRooms) return emptyList()
         if (room.depth >= options.maximumRoomDistance) return emptyList()
@@ -125,8 +118,8 @@ class SinglePathDungeonGenerator(
         otherPassageIndex: Int, otherRoom: DungeonRoom
     ) {
         // TODO
-        /*room.doors[passageIndex] = otherRoom.id
-        otherRoom.doors[otherPassageIndex] = room.id*/
+        *//*room.doors[passageIndex] = otherRoom.id
+        otherRoom.doors[otherPassageIndex] = room.id*//*
     }
 
     private fun findAllFits(
@@ -147,6 +140,9 @@ class SinglePathDungeonGenerator(
         }
 
         return fits
+    }*/
+    override fun generate(): List<DungeonRoom> {
+        TODO("Not yet implemented")
     }
 
 }

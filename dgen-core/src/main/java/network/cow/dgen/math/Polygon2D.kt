@@ -3,7 +3,7 @@ package network.cow.dgen.math
 /**
  * @author Tobias Büser
  */
-class Polygon2D(val vertices: List<Vector2D>) {
+class Polygon2D(val vertices: List<Vector2D>) : Transformable<Polygon2D> {
 
     val min = Vector2D(vertices.minOf { it.x }, vertices.minOf { it.y })
     val max = Vector2D(vertices.maxOf { it.x }, vertices.maxOf { it.y })
@@ -29,12 +29,12 @@ class Polygon2D(val vertices: List<Vector2D>) {
         this.orientation = this.calculateOrientation()
     }
 
-    fun rotate(degrees: Double): Polygon2D {
-        val rotatedVertices = vertices.toMutableList()
+    override fun transform(transform: Transform): Polygon2D {
+        val transformedVertices = vertices.toMutableList()
         vertices.forEachIndexed { index, vector ->
-            rotatedVertices[index] = vector.rotate(degrees)
+            transformedVertices[index] = vector.transform(transform)
         }
-        return Polygon2D(rotatedVertices)
+        return Polygon2D(transformedVertices)
     }
 
     fun overlapsWith(other: Polygon2D): Boolean {
