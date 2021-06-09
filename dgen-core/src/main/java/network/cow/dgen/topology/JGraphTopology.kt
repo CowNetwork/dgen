@@ -16,8 +16,10 @@ class JGraphTopology(
     override val edges: Set<Topology.Edge>
 ) : Topology {
 
-    private val graph: Graph<String, DefaultEdge>
+    private val vertexMap = vertices.associateBy { it.element }
+    private val edgeMap = edges.associateBy { it.source to it.target }
 
+    private val graph: Graph<String, DefaultEdge>
     private val planarityInspector: BoyerMyrvoldPlanarityInspector<String, DefaultEdge>
     private val connectivityInspector: ConnectivityInspector<String, DefaultEdge>
 
@@ -25,11 +27,14 @@ class JGraphTopology(
         graph = DefaultUndirectedGraph(DefaultEdge::class.java)
 
         vertices.forEach { graph.addVertex(it.element) }
-        edges.forEach { graph.addEdge(it.source, it.dest) }
+        edges.forEach { graph.addEdge(it.source, it.target) }
 
         this.planarityInspector = BoyerMyrvoldPlanarityInspector(graph)
         this.connectivityInspector = ConnectivityInspector(graph)
     }
+
+    override fun getVertex(element: String) = this.vertexMap[element]
+    override fun getEdge(source: String, target: String) = this.edgeMap[source to target]
 
     override fun shortestDistance(source: String, dest: String): Int {
         return DijkstraShortestPath(graph).getPath(source, dest).length
@@ -40,7 +45,6 @@ class JGraphTopology(
     }
 
     override fun isPlanar() = planarityInspector.isPlanar
-
     override fun isConnected() = connectivityInspector.isConnected
 
 }

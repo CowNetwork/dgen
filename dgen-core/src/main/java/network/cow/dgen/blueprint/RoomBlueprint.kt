@@ -45,6 +45,11 @@ open class RoomBlueprint(
         }
         if (!noDuplicates) throw IllegalArgumentException("All vertices have to be unique.")
 
+        val noDuplicateDoors = this.doors.all {
+            this.doors.count { other -> it == other } == 1
+        }
+        if (!noDuplicateDoors) throw IllegalArgumentException("All doors have to be unique.")
+
         val straightLines = this.outline.edges.all {
             it.isVertical || it.isHorizontal
         }
@@ -95,5 +100,6 @@ open class RoomBlueprint(
      * instead of absolute.
      */
     fun normalize() = this.shift(Vector2D.ZERO - this.outline.min)
+
 
 }

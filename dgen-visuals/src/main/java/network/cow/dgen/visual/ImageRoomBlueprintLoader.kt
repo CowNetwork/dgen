@@ -5,7 +5,6 @@ import network.cow.dgen.blueprint.RoomBlueprintLoader
 import network.cow.dgen.math.Line2D
 import network.cow.dgen.math.Polygon2D
 import network.cow.dgen.math.Vector2D
-import network.cow.dgen.room.NormalRoomBlueprint
 import java.awt.Color
 import java.awt.image.BufferedImage
 
@@ -61,7 +60,7 @@ class ImageRoomBlueprintLoader(private val image: BufferedImage, private val gri
         val sortedVertices = sortVertices(vertices, otherPoints + passagePoints)
         if (sortedVertices.isEmpty()) return emptyList()
 
-        blueprints.add(NormalRoomBlueprint("${vertices.size}v${passagePoints.size}p${otherPoints.size}o", Polygon2D(sortedVertices), passagePoints))
+        blueprints.add(RoomBlueprint("${vertices.size}v${passagePoints.size}p${otherPoints.size}o", Polygon2D(sortedVertices), passagePoints))
 
         return blueprints
     }

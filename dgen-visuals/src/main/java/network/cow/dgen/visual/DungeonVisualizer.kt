@@ -3,8 +3,6 @@ package network.cow.dgen.visual
 import network.cow.dgen.DungeonRoom
 import network.cow.dgen.blueprint.RoomBlueprint
 import network.cow.dgen.math.Vector2D
-import network.cow.dgen.room.FinalRoomBlueprint
-import network.cow.dgen.room.SpawnRoomBlueprint
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -59,6 +57,10 @@ class DungeonVisualizer(private vararg val rooms: DungeonRoom) : JFrame() {
     }
 
     private fun createImage(): BufferedImage {
+        if (rooms.isEmpty()) {
+            return BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+        }
+
         val maxX = rooms.maxOf { it.blueprint.outline.max.x }
         val maxY = rooms.maxOf { it.blueprint.outline.max.y }
 
@@ -89,11 +91,11 @@ class DungeonVisualizer(private vararg val rooms: DungeonRoom) : JFrame() {
     }
 
     private fun paintRoomBlueprint(blueprint: RoomBlueprint, graphics: Graphics2D) {
-        when (blueprint) {
-            is SpawnRoomBlueprint -> {
+        when {
+            blueprint.name.startsWith("spawn_") -> {
                 graphics.color = SPAWN_ROOM_OUTLINE_COLOR
             }
-            is FinalRoomBlueprint -> {
+            blueprint.name.startsWith("final_") -> {
                 graphics.color = FINAL_ROOM_OUTLINE_COLOR
             }
             else -> {
@@ -104,11 +106,11 @@ class DungeonVisualizer(private vararg val rooms: DungeonRoom) : JFrame() {
             graphics.drawLine(it.start.x.toInt(), it.start.y.toInt(), it.end.x.toInt(), it.end.y.toInt())
         }
 
-        when (blueprint) {
-            is SpawnRoomBlueprint -> {
+        when {
+            blueprint.name.startsWith("spawn_") -> {
                 graphics.color = SPAWN_ROOM_VERTICES_COLOR
             }
-            is FinalRoomBlueprint -> {
+            blueprint.name.startsWith("final_") -> {
                 graphics.color = FINAL_ROOM_VERTICES_COLOR
             }
             else -> {

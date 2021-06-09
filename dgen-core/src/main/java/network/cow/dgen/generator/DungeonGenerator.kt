@@ -16,7 +16,7 @@ abstract class DungeonGenerator(
     val random = Random(seed)
 
     init {
-        if (options.numberOfRooms > 2) {
+        /*if (options.numberOfRooms > 2) {
             val singleDoorRoomCount = blueprints.filter { it.doors.size == 1 }.count()
             val multiDoorRoomCount = blueprints.filter { it.doors.size >= 2 }.count()
 
@@ -28,7 +28,7 @@ abstract class DungeonGenerator(
         val possibleNumberOfRooms = this.calculatePossibleNumberOfRooms()
         if (possibleNumberOfRooms < options.numberOfRooms) {
             throw IllegalArgumentException("With these blueprints, we can't reach given number of rooms. ($possibleNumberOfRooms < ${options.numberOfRooms})")
-        }
+        }*/
     }
 
     abstract fun generate(): List<DungeonRoom>
@@ -37,13 +37,12 @@ abstract class DungeonGenerator(
      * Calculate, if we can reach the [Options.numberOfRooms].
      * - If there are rooms with d>=2, we can easily reach numberOfRooms
      * - If there are only rooms with d=1, we can only reach numberOfRooms=d(spawnRoom)
-     */
     private fun calculatePossibleNumberOfRooms(): Int {
-        if (blueprints.filter { it.doors.size >= 2 }.count() > 0)
-            return options.numberOfRooms
-        /*return blueprints.filterIsInstance<SpawnRoomBlueprint>().maxOf { it.doors.size }*/
+    if (blueprints.filter { it.doors.size >= 2 }.count() > 0)
+    return options.numberOfRooms
+     *//*return blueprints.filterIsInstance<SpawnRoomBlueprint>().maxOf { it.doors.size }*//*
         return 0
-    }
+    }*/
 
     data class Options(val numberOfRooms: Int, val maximumRoomDistance: Int) {
 

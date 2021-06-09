@@ -1,5 +1,8 @@
 package network.cow.dgen.topology
 
+import network.cow.dgen.blueprint.RoomBlueprint
+import java.util.function.Predicate
+
 /**
  * The input is a set of vertices and edges connecting them.
  * - check if the graph is planar
@@ -12,6 +15,9 @@ interface Topology {
     val vertices: Set<Vertex>
     val edges: Set<Edge>
 
+    fun getVertex(element: String): Vertex?
+    fun getEdge(source: String, target: String): Edge?
+
     fun shortestDistance(source: String, dest: String): Int
     fun getNeighbors(vertex: String): Set<Vertex>
 
@@ -19,7 +25,8 @@ interface Topology {
     fun isPlanar(): Boolean
     fun isConnected(): Boolean
 
-    data class Vertex(val element: String)
-    data class Edge(val source: String, val dest: String)
+    data class Vertex(val element: String, val constraint: Predicate<RoomBlueprint> = Predicate { true })
+    data class Edge(val source: String, val target: String)
+    data class Chain(val vertices: List<Vertex>) : ArrayList<Vertex>(vertices)
 
 }
