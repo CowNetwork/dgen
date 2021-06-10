@@ -1,6 +1,5 @@
 package network.cow.dgen.topology
 
-import org.jgrapht.Graph
 import org.jgrapht.Graphs
 import org.jgrapht.alg.connectivity.ConnectivityInspector
 import org.jgrapht.alg.planar.BoyerMyrvoldPlanarityInspector
@@ -19,13 +18,11 @@ class JGraphTopology(
     private val vertexMap = vertices.associateBy { it.element }
     private val edgeMap = edges.associateBy { it.source to it.target }
 
-    private val graph: Graph<String, DefaultEdge>
-    private val planarityInspector: BoyerMyrvoldPlanarityInspector<String, DefaultEdge>
-    private val connectivityInspector: ConnectivityInspector<String, DefaultEdge>
+    val graph = DefaultUndirectedGraph<String, DefaultEdge>(DefaultEdge::class.java)
+    val planarityInspector: BoyerMyrvoldPlanarityInspector<String, DefaultEdge>
+    val connectivityInspector: ConnectivityInspector<String, DefaultEdge>
 
     init {
-        graph = DefaultUndirectedGraph(DefaultEdge::class.java)
-
         vertices.forEach { graph.addVertex(it.element) }
         edges.forEach { graph.addEdge(it.source, it.target) }
 
