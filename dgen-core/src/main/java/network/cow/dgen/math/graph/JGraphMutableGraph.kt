@@ -1,4 +1,4 @@
-package network.cow.dgen.math
+package network.cow.dgen.math.graph
 
 import org.jgrapht.Graphs
 import org.jgrapht.alg.connectivity.ConnectivityInspector
@@ -10,20 +10,36 @@ import org.jgrapht.graph.DefaultUndirectedGraph
 /**
  * @author Tobias Büser
  */
-class JGraphMutableGraph<V> : MutableGraph<V> {
+class JGraphMutableGraph<V>(
+    vertices: Map<String, V> = mapOf(),
+    edges: Set<Graph.Edge> = setOf()
+) : MutableGraph<V> {
 
-    override val vertices = mutableSetOf<V>()
+    private val adjacencyMap = mutableMapOf<String, MutableSet<String>>()
     private val verticesMap = mutableMapOf<String, V>()
 
-    override val edges = mutableSetOf<Graph.Edge<V>>()
+    override val edges = mutableSetOf<Graph.Edge>()
+
+    override val vertices: Collection<V>
+        get() = verticesMap.values
+    override val vertexKeys: Set<String>
+        get() = verticesMap.keys
 
     val jgraph = DefaultUndirectedGraph<String, DefaultEdge>(DefaultEdge::class.java)
     private val planarityInspector: BoyerMyrvoldPlanarityInspector<String, DefaultEdge>
     private val connectivityInspector: ConnectivityInspector<String, DefaultEdge>
 
     init {
-        verticesMap.keys.forEach { jgraph.addVertex(it) }
-        edges.forEach { jgraph.addEdge(it.sourceKey, it.targetKey) }
+        this.verticesMap.putAll(vertices)
+        this.edges.addAll(edges)
+
+        // fill jgraph with it
+        this.verticesMap.keys.forEach { jgraph.addVertex(it) }
+        this.edges.forEach { jgraph.addEdge(it.sourceKey, it.targetKey) }
+        this.vertexKeys.forEach {
+            val neighbors = Graphs.neighborListOf(this.jgraph, it).toMutableSet()
+            this.adjacencyMap[it] = neighbors
+        }
 
         this.planarityInspector = BoyerMyrvoldPlanarityInspector(jgraph)
         this.connectivityInspector = ConnectivityInspector(jgraph)
@@ -39,43 +55,54 @@ class JGraphMutableGraph<V> : MutableGraph<V> {
         return DijkstraShortestPath(jgraph).getPath(sourceKey, targetKey).length
     }
 
-    override fun getNeighbors(vertex: String): Set<V> {
-        return Graphs.neighborListOf(this.jgraph, vertex).map { verticesMap[it]!! }.toSet()
-    }
+    override fun getNeighbors(vertexKey: String) = this.adjacencyMap[vertexKey] ?: emptySet()
 
     override fun isPlanar() = planarityInspector.isPlanar
     override fun isConnected() = connectivityInspector.isConnected
 
     override fun addVertex(key: String, vertex: V) {
-        this.vertices.add(vertex)
         this.verticesMap[key] = vertex
 
         this.jgraph.addVertex(key)
     }
 
-    override fun addEdge(edge: Graph.Edge<V>) {
+    override fun addEdge(edge: Graph.Edge) {
         this.edges.add(edge)
 
         this.jgraph.addEdge(edge.sourceKey, edge.targetKey)
+
+        // we have a new neighbor pair
+        val source = adjacencyMap[edge.sourceKey] ?: mutableSetOf()
+        source.add(edge.targetKey)
+        adjacencyMap[edge.sourceKey] = source
+
+        val target = adjacencyMap[edge.targetKey] ?: mutableSetOf()
+        target.add(edge.sourceKey)
+        adjacencyMap[edge.targetKey] = target
     }
 
     override fun removeVertex(key: String) {
-        this.vertices.remove(this.verticesMap[key]!!)
+        this.verticesMap.remove(key) ?: return
 
         this.jgraph.removeVertex(key)
+
+        // remove vertex from all neighbors
+        this.adjacencyMap.remove(key)
+        this.adjacencyMap.values.forEach { it.remove(key) }
     }
 
     override fun removeEdge(sourceKey: String, targetKey: String) {
         this.edges.removeIf { it.sourceKey == sourceKey && it.targetKey == targetKey }
 
         this.jgraph.removeEdge(sourceKey, targetKey)
+
+        // they are not neighbors anymore
+        this.adjacencyMap[sourceKey]?.remove(targetKey)
+        this.adjacencyMap[targetKey]?.remove(sourceKey)
     }
 
-    override fun removeEdges(filter: (Graph.Edge<V>) -> Boolean) {
-        val edges = this.edges.filter(filter)
-        this.edges.removeAll(edges)
-
-        edges.forEach { jgraph.removeEdge(it.sourceKey, it.targetKey) }
+    override fun removeEdges(filter: (Graph.Edge) -> Boolean) {
+        this.edges.filter(filter).forEach { this.removeEdge(it.sourceKey, it.targetKey) }
     }
 
     override fun deepCopy(): MutableGraph<V> {
