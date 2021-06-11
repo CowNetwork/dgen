@@ -29,14 +29,19 @@ interface Graph<V> {
         val targetKey: String
     )
 
-    class DirectedChain(vertices: List<String>) : ArrayList<String>(vertices) {
+    /**
+     * A chunk is just a collection of vertices, that are
+     * connected to each other. But the order of the list does not
+     * correspond to the real connection between them!
+     */
+    class Chunk(vertices: List<String>) : ArrayList<String>(vertices) {
 
         /**
-         * Two chains are next to each other, when at least
-         * one vertex of this chain has a common edge in [graph]
-         * with one vertex of the [other] chain.
+         * Two chunks are next to each other, when at least
+         * one vertex of this chunks has a common edge in [graph]
+         * with one vertex of the [other] chunks.
          */
-        fun isNextTo(graph: Graph<*>, other: DirectedChain): Boolean {
+        fun isNextTo(graph: Graph<*>, other: Chunk): Boolean {
             for (vertex in this) {
                 val neighbors = graph.getNeighbors(vertex)
                 for (otherVertex in other) {

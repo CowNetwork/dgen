@@ -18,6 +18,6 @@ interface GraphDecomposer {
         private const val AVERAGE_CHUNK_MIN_SIZE = 4
     }
 
-    fun decompose(graph: MutableGraph<*>, chunkMinSize: Int = AVERAGE_CHUNK_MIN_SIZE): List<Graph.DirectedChain>
+    fun decompose(graph: MutableGraph<*>, chunkMinSize: Int = AVERAGE_CHUNK_MIN_SIZE): List<Graph.Chunk>
 
 }

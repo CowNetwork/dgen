@@ -4,24 +4,24 @@ package network.cow.dgen.math.graph
  * This decomposer works by doing a [BreadthFirstSearchIterator] from
  * a starting vertex until the decomposing chunk size is reached.
  *
- * Now if there are still smaller chains left, we just add them to adjacent chains,
+ * Now if there are still smaller chunks left, we just add them to adjacent chunks,
  * until they reach the chunk size.
- * The search for adjacent chains always works, because we are working with a
+ * The search for adjacent chunks always works, because we are working with a
  * connected graph.
  *
  * @author Tobias Büser
  */
 class BreadthFirstSearchGraphDecomposer : GraphDecomposer {
 
-    override fun decompose(graph: MutableGraph<*>, chunkMinSize: Int): List<Graph.DirectedChain> {
+    override fun decompose(graph: MutableGraph<*>, chunkMinSize: Int): List<Graph.Chunk> {
         if (!graph.isConnected()) throw IllegalArgumentException("The graph needs to be connected.")
 
-        val chains = mutableListOf<Graph.DirectedChain>()
+        val chunks = mutableListOf<Graph.Chunk>()
 
         // if the graph is already less or equal to the chunk size
         // we can just return the existing vertices as a list.
         if (graph.size <= chunkMinSize) {
-            return listOf(Graph.DirectedChain(graph.vertexKeys.toList()))
+            return listOf(Graph.Chunk(graph.vertexKeys.toList()))
         }
 
         val graphCopy = graph.deepCopy()
@@ -38,7 +38,7 @@ class BreadthFirstSearchGraphDecomposer : GraphDecomposer {
             }
 
             // we have one chain, remove it from graph and set new random vertex
-            chains.add(Graph.DirectedChain(found))
+            chunks.add(Graph.Chunk(found))
             graphCopy.removeVertices(*found.toTypedArray())
 
             current = this.selectNewVertex(graphCopy)
@@ -46,22 +46,22 @@ class BreadthFirstSearchGraphDecomposer : GraphDecomposer {
 
         // now we balance the chains by finding adjacent
         // chains to add them to
-        val smallerChains = chains.filter { it.size < chunkMinSize }.toMutableList()
-        while (smallerChains.isNotEmpty()) {
-            smallerChains.removeAll { smallerChain ->
-                val adjacentChains = chains
-                    .filter { it != smallerChain && it.isNextTo(graph, smallerChain) }
+        val smallerChunks = chunks.filter { it.size < chunkMinSize }.toMutableList()
+        while (smallerChunks.isNotEmpty()) {
+            smallerChunks.removeAll { smallerChunk ->
+                val adjacentChunks = chunks
+                    .filter { it != smallerChunk && it.isNextTo(graph, smallerChunk) }
                     .sortedBy { it.size }
-                val adjacent = adjacentChains.firstOrNull() ?: return@removeAll false
+                val adjacent = adjacentChunks.firstOrNull() ?: return@removeAll false
 
                 // merge adjacent with smallerChain
-                adjacent.addAll(smallerChain)
-                chains.remove(smallerChain)
+                adjacent.addAll(smallerChunk)
+                chunks.remove(smallerChunk)
 
                 adjacent.size >= chunkMinSize
             }
         }
-        return chains
+        return chunks
     }
 
     /**
