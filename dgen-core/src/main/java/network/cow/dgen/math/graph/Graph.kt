@@ -29,15 +29,21 @@ interface Graph<V> {
         val targetKey: String
     )
 
-    class DirectedChain<V>(vertices: List<V>) : ArrayList<V>(vertices) {
+    class DirectedChain(vertices: List<String>) : ArrayList<String>(vertices) {
 
         /**
          * Two chains are next to each other, when at least
-         * one vertex of this chain has a common edge with one vertex
-         * of the other chain.
+         * one vertex of this chain has a common edge in [graph]
+         * with one vertex of the [other] chain.
          */
-        fun isNextTo(other: DirectedChain<*>): Boolean {
-            return true
+        fun isNextTo(graph: Graph<*>, other: DirectedChain): Boolean {
+            for (vertex in this) {
+                val neighbors = graph.getNeighbors(vertex)
+                for (otherVertex in other) {
+                    if (otherVertex in neighbors) return true
+                }
+            }
+            return false
         }
 
     }

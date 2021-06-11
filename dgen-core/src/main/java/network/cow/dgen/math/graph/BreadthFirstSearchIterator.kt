@@ -14,6 +14,10 @@ import java.util.Queue
  * If a vertex has been enqueued, we also mark it as visited, as in graphs we could
  * encounter a cycle, which would result in visiting a vertex twice.
  *
+ * **Time complexity**:
+ * Let V be the number of vertices and E the number of edges.
+ * Then the complexity is given as **O(V + E)**
+ *
  * @author Tobias Büser
  */
 class BreadthFirstSearchIterator<V>(val graph: Graph<V>, start: String) : Iterator<String> {

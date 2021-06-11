@@ -1,32 +1,22 @@
 package network.cow.dgen.topology
 
-import network.cow.dgen.blueprint.RoomBlueprint
-import java.util.function.Predicate
+import network.cow.dgen.math.graph.Graph
+import network.cow.dgen.math.graph.JGraphMutableGraph
 
 /**
- * The input is a set of vertices and edges connecting them.
- * - check if the graph is planar
- * - get faces, i.e. List<List<Vertex>>
- *
  * @author Tobias Büser
  */
-interface Topology {
+class Topology(
+    vertices: Map<String, Node> = mapOf(),
+    edges: Set<Graph.Edge> = setOf()
+) : JGraphMutableGraph<Node>(vertices, edges) {
 
-    val vertices: Set<Vertex>
-    val edges: Set<Edge>
-
-    fun getVertex(element: String): Vertex?
-    fun getEdge(source: String, target: String): Edge?
-
-    fun shortestDistance(source: String, dest: String): Int
-    fun getNeighbors(vertex: String): Set<Vertex>
-
-    fun size() = this.vertices.size
-    fun isPlanar(): Boolean
-    fun isConnected(): Boolean
-
-    data class Vertex(val element: String, val constraint: Predicate<RoomBlueprint> = Predicate { true })
-    data class Edge(val source: String, val target: String)
-    data class Chain(val vertices: List<Vertex>) : ArrayList<Vertex>(vertices)
+    init {
+        if (this.size <= 1) throw IllegalArgumentException("The topology needs at least two rooms.")
+        if (!this.isConnected()) throw IllegalArgumentException("The topology should not contain unreachable rooms.")
+        if (!this.isPlanar()) throw IllegalArgumentException("The underlying graph needs to be planar")
+    }
 
 }
+
+typealias Node = Int

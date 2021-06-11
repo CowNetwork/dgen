@@ -14,6 +14,7 @@ class TopologyDungeonGenerator(
 ) : DungeonGenerator(seed, blueprints, options) {
 
     /*
+    TODO
 
     How does the generation work?
     1 Choose initial vertex
@@ -35,7 +36,6 @@ class TopologyDungeonGenerator(
 
     */
     override fun generate(): List<DungeonRoom> {
-        this.checkTopology(topology)
         val filteredBlueprints = this.filterBlueprints(blueprints, topology)
 
         println("=> FilteredBlueprints: ${filteredBlueprints.size}/${blueprints.size}")
@@ -44,20 +44,13 @@ class TopologyDungeonGenerator(
         return emptyList()
     }
 
-    // check if the topology is correct
-    fun checkTopology(topology: Topology) {
-        if (topology.size() <= 1) throw IllegalArgumentException("The topology needs at least two rooms.")
-        if (!topology.isConnected()) throw IllegalArgumentException("The topology should not contain unreachable rooms.")
-        if (!topology.isPlanar()) throw IllegalArgumentException("The underlying graph needs to be planar")
-    }
-
     // check if we have fitting blueprints for the topology
     // filter out all, that we dont need, i.e.:
     // - all that has less or more door counts that we need
     // - OR all that doesnt have at least one vertex having a constraint with it
     fun filterBlueprints(blueprints: List<RoomBlueprint>, topology: Topology): List<RoomBlueprint> {
-        val neededDoorCounts = topology.vertices.map {
-            topology.getNeighbors(it.element).size
+        val neededDoorCounts = topology.vertexKeys.map {
+            topology.getNeighbors(it).size
         }.toSet()
 
         neededDoorCounts.forEach {
@@ -69,7 +62,6 @@ class TopologyDungeonGenerator(
         }
 
         return blueprints.filter { it.doors.size in neededDoorCounts }
-            .filter { topology.vertices.any { vert -> vert.constraint.test(it) } }
     }
 
 }

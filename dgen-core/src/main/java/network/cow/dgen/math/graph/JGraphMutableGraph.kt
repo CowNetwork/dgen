@@ -10,7 +10,7 @@ import org.jgrapht.graph.DefaultUndirectedGraph
 /**
  * @author Tobias Büser
  */
-class JGraphMutableGraph<V>(
+open class JGraphMutableGraph<V>(
     vertices: Map<String, V> = mapOf(),
     edges: Set<Graph.Edge> = setOf()
 ) : MutableGraph<V> {
@@ -18,11 +18,11 @@ class JGraphMutableGraph<V>(
     private val adjacencyMap = mutableMapOf<String, MutableSet<String>>()
     private val verticesMap = mutableMapOf<String, V>()
 
-    override val edges = mutableSetOf<Graph.Edge>()
+    final override val edges = mutableSetOf<Graph.Edge>()
 
-    override val vertices: Collection<V>
+    final override val vertices: Collection<V>
         get() = verticesMap.values
-    override val vertexKeys: Set<String>
+    final override val vertexKeys: Set<String>
         get() = verticesMap.keys
 
     val jgraph = DefaultUndirectedGraph<String, DefaultEdge>(DefaultEdge::class.java)
