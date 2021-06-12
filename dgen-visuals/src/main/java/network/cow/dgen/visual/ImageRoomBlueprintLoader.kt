@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage
 
 /**
  * Loads [NormalRoomBlueprint]s from a [BufferedImage], which then cuts the image in
- * [gridSize] big chunks and converts it into a blueprint.
+ * [gridSize] big partitions and converts it into a blueprint.
  *
  * @author Tobias Büser
  */

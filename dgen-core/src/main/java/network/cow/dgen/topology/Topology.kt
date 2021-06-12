@@ -8,8 +8,8 @@ import network.cow.dgen.math.graph.JGraphMutableGraph
  */
 class Topology(
     vertices: Map<String, Node> = mapOf(),
-    edges: Set<Graph.Edge> = setOf()
-) : JGraphMutableGraph<Node>(vertices, edges) {
+    edges: Set<Graph.Edge<EdgeDescriptor>> = setOf()
+) : JGraphMutableGraph<Node, EdgeDescriptor>(vertices, edges) {
 
     init {
         if (this.size <= 1) throw IllegalArgumentException("The topology needs at least two rooms.")
@@ -20,3 +20,5 @@ class Topology(
 }
 
 typealias Node = Int
+
+typealias EdgeDescriptor = Int

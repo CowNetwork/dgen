@@ -20,8 +20,13 @@ import network.cow.dgen.math.Vector2D
  * the outer shape of the room.
  * @property doors Vectors on the outline specifying the points that can
  * connect to other room blueprints.
- * @property rotation Current clockwise rotation in degrees of this blueprint. To get the
- * origin blueprint, rotate it by -[rotation].
+ *
+ * TODO metric on how good the blueprint is for generation
+ * - distance between doors (the more the better) in relation
+ * to the general outline's length
+ * - count of doors (the more the better)
+ * - count of edges (the more the better)
+ * -> normalize this metric to be between [0, 1]
  *
  * @author Tobias Büser
  */
@@ -34,6 +39,7 @@ open class RoomBlueprint(
 ) : Transformable<RoomBlueprint> {
 
     val rotation = rotation; get() = field % MAX_ROTATION
+    val doorCount = doors.size
 
     init {
         if (doors.isEmpty()) throw IllegalArgumentException("A room should always contain a door.")

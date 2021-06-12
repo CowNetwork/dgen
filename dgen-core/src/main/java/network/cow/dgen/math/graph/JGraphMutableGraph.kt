@@ -10,15 +10,15 @@ import org.jgrapht.graph.DefaultUndirectedGraph
 /**
  * @author Tobias Büser
  */
-open class JGraphMutableGraph<V>(
+open class JGraphMutableGraph<V, E>(
     vertices: Map<String, V> = mapOf(),
-    edges: Set<Graph.Edge> = setOf()
-) : MutableGraph<V> {
+    edges: Set<Graph.Edge<E>> = setOf()
+) : MutableGraph<V, E> {
 
     private val adjacencyMap = mutableMapOf<String, MutableSet<String>>()
     private val verticesMap = mutableMapOf<String, V>()
 
-    final override val edges = mutableSetOf<Graph.Edge>()
+    final override val edges = mutableSetOf<Graph.Edge<E>>()
 
     final override val vertices: Collection<V>
         get() = verticesMap.values
@@ -35,7 +35,7 @@ open class JGraphMutableGraph<V>(
 
         // fill jgraph with it
         this.verticesMap.keys.forEach { jgraph.addVertex(it) }
-        this.edges.forEach { jgraph.addEdge(it.sourceKey, it.targetKey) }
+        this.edges.forEach { jgraph.addEdge(it.from, it.to) }
         this.vertexKeys.forEach {
             val neighbors = Graphs.neighborListOf(this.jgraph, it).toMutableSet()
             this.adjacencyMap[it] = neighbors
@@ -46,16 +46,20 @@ open class JGraphMutableGraph<V>(
     }
 
     override fun getVertex(key: String) = this.verticesMap[key]
-    override fun getEdge(sourceKey: String, targetKey: String) = this.edges.find { it.sourceKey == sourceKey && it.targetKey == targetKey }
+    override fun getEdge(from: String, to: String) = this.edges.find { it.from == from && it.to == to }
 
-    override fun getEdgesTo(sourceKey: String) = this.edges.filter { it.sourceKey == sourceKey }
-    override fun getEdgesFrom(targetKey: String) = this.edges.filter { it.targetKey == targetKey }
-
-    override fun shortestDistance(sourceKey: String, targetKey: String): Int {
-        return DijkstraShortestPath(jgraph).getPath(sourceKey, targetKey).length
+    override fun getEdge(fromTo: Pair<String, String>): Graph.Edge<E>? {
+        return this.edges.find { it.from == fromTo.first && it.to == fromTo.second }
     }
 
-    override fun getNeighbors(vertexKey: String) = this.adjacencyMap[vertexKey] ?: emptySet()
+    override fun getEdgesTo(from: String) = this.edges.filter { it.from == from }
+    override fun getEdgesFrom(to: String) = this.edges.filter { it.to == to }
+
+    override fun shortestDistance(from: String, to: String): Int {
+        return DijkstraShortestPath(jgraph).getPath(from, to).length
+    }
+
+    override fun getNeighbors(vertex: String) = this.adjacencyMap[vertex] ?: emptySet()
 
     override fun isPlanar() = planarityInspector.isPlanar
     override fun isConnected() = connectivityInspector.isConnected
@@ -66,49 +70,49 @@ open class JGraphMutableGraph<V>(
         this.jgraph.addVertex(key)
     }
 
-    override fun addEdge(edge: Graph.Edge) {
+    override fun addEdge(edge: Graph.Edge<E>) {
         this.edges.add(edge)
 
-        this.jgraph.addEdge(edge.sourceKey, edge.targetKey)
+        this.jgraph.addEdge(edge.from, edge.to)
 
         // we have a new neighbor pair
-        val source = adjacencyMap[edge.sourceKey] ?: mutableSetOf()
-        source.add(edge.targetKey)
-        adjacencyMap[edge.sourceKey] = source
+        val source = adjacencyMap[edge.from] ?: mutableSetOf()
+        source.add(edge.to)
+        adjacencyMap[edge.from] = source
 
-        val target = adjacencyMap[edge.targetKey] ?: mutableSetOf()
-        target.add(edge.sourceKey)
-        adjacencyMap[edge.targetKey] = target
+        val target = adjacencyMap[edge.to] ?: mutableSetOf()
+        target.add(edge.from)
+        adjacencyMap[edge.to] = target
     }
 
-    override fun removeVertex(key: String) {
-        this.verticesMap.remove(key) ?: return
+    override fun removeVertex(vertex: String) {
+        this.verticesMap.remove(vertex) ?: return
 
-        this.jgraph.removeVertex(key)
+        this.jgraph.removeVertex(vertex)
 
         // remove vertex from all neighbors
-        this.adjacencyMap.remove(key)
-        this.adjacencyMap.values.forEach { it.remove(key) }
+        this.adjacencyMap.remove(vertex)
+        this.adjacencyMap.values.forEach { it.remove(vertex) }
     }
 
-    override fun removeEdge(sourceKey: String, targetKey: String) {
-        this.edges.removeIf { it.sourceKey == sourceKey && it.targetKey == targetKey }
+    override fun removeEdge(from: String, to: String) {
+        this.edges.removeIf { it.from == from && it.to == to }
 
-        this.jgraph.removeEdge(sourceKey, targetKey)
+        this.jgraph.removeEdge(from, to)
 
         // they are not neighbors anymore
-        this.adjacencyMap[sourceKey]?.remove(targetKey)
-        this.adjacencyMap[targetKey]?.remove(sourceKey)
+        this.adjacencyMap[from]?.remove(to)
+        this.adjacencyMap[to]?.remove(from)
     }
 
-    override fun removeEdges(filter: (Graph.Edge) -> Boolean) {
-        this.edges.filter(filter).forEach { this.removeEdge(it.sourceKey, it.targetKey) }
+    override fun removeEdges(filter: (Graph.Edge<E>) -> Boolean) {
+        this.edges.filter(filter).forEach { this.removeEdge(it.from, it.to) }
     }
 
-    override fun deepCopy(): MutableGraph<V> {
-        val copy = JGraphMutableGraph<V>()
+    override fun deepCopy(): MutableGraph<V, E> {
+        val copy = JGraphMutableGraph<V, E>()
         this.verticesMap.forEach { (key, vertex) -> copy.addVertex(key, vertex) }
-        this.edges.forEach { copy.addEdge(it.sourceKey, it.targetKey) }
+        this.edges.forEach { copy.addEdge(it.from, it.to, it.descriptor) }
 
         return copy
     }
