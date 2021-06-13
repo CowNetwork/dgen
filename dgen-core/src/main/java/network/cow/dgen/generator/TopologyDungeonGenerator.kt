@@ -45,14 +45,14 @@ class TopologyDungeonGenerator(
         println(" ")
 
         val decomposer = BreadthFirstSearchGraphDecomposer()
-        val partitions = decomposer.decompose(topology)
+        val partitions = decomposer.decompose(topology.graph)
         println("Decomposed partitions:")
         partitions.forEach {
             println("=> $it")
         }
         println("")
 
-        val partitionPlacer = PartitionPlacerInYourAss(topology, partitions[0], filteredBlueprints)
+        val partitionPlacer = PartitionPlacerInYourAss(topology.graph, partitions[0], filteredBlueprints)
         partitionPlacer.doItDaddy()
 
         return emptyList()
@@ -63,8 +63,8 @@ class TopologyDungeonGenerator(
     // - all that has less or more door counts that we need
     // - OR all that doesnt have at least one vertex having a constraint with it
     fun filterBlueprints(blueprints: List<RoomBlueprint>, topology: Topology): List<RoomBlueprint> {
-        val neededDoorCounts = topology.vertexKeys.map {
-            topology.getNeighbors(it).size
+        val neededDoorCounts = topology.graph.vertexKeys.map {
+            topology.graph.getNeighbors(it).size
         }.toSet()
 
         neededDoorCounts.forEach {
