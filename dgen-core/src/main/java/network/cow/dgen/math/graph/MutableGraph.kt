@@ -8,10 +8,7 @@ interface MutableGraph<V, E> : Graph<V, E> {
     fun addVertex(key: String, vertex: V)
 
     fun addEdge(edge: Graph.Edge<E>)
-    fun addEdge(fromTo: Pair<String, String>, descriptor: E) {
-        this.addEdge(Graph.Edge(fromTo.first, fromTo.second, descriptor))
-    }
-
+    fun addEdge(fromTo: Pair<String, String>, descriptor: E) = this.addEdge(Graph.Edge(fromTo.first, fromTo.second, descriptor))
     fun addEdge(from: String, to: String, descriptor: E) = this.addEdge(from to to, descriptor)
 
     fun removeVertex(vertex: String)

@@ -13,15 +13,15 @@ package network.cow.dgen.math.graph
  */
 class BreadthFirstSearchGraphDecomposer : GraphDecomposer {
 
-    override fun decompose(graph: MutableGraph<*>, partitionMinSize: Int): List<Graph.Partition> {
+    override fun decompose(graph: MutableGraph<*, *>, partitionMinSize: Int): List<OrderedPartition> {
         if (!graph.isConnected()) throw IllegalArgumentException("The graph needs to be connected.")
 
-        val partitions = mutableListOf<Graph.Partition>()
+        val partitions = mutableListOf<OrderedPartition>()
 
         // if the graph is already less or equal to the partition size
         // we can just return the existing vertices as a list.
         if (graph.size <= partitionMinSize) {
-            return listOf(Graph.Partition(graph.vertexKeys.toList()))
+            return listOf(OrderedPartition(graph.vertexKeys.toList()))
         }
 
         val graphCopy = graph.deepCopy()
@@ -38,7 +38,7 @@ class BreadthFirstSearchGraphDecomposer : GraphDecomposer {
             }
 
             // we have one chain, remove it from graph and set new random vertex
-            partitions.add(Graph.Partition(found))
+            partitions.add(OrderedPartition(found))
             graphCopy.removeVertices(*found.toTypedArray())
 
             current = this.selectNewVertex(graphCopy)
@@ -73,7 +73,7 @@ class BreadthFirstSearchGraphDecomposer : GraphDecomposer {
      *
      * If no vertex is left, it won't find one, returning null.
      */
-    private fun selectNewVertex(graph: Graph<*>): String? {
+    private fun selectNewVertex(graph: Graph<*, *>): String? {
         return graph.vertexKeys.minByOrNull { graph.getNeighbors(it).size }
     }
 

@@ -18,6 +18,6 @@ interface GraphDecomposer {
         private const val MIN_PARTITION_SIZE = 4
     }
 
-    fun decompose(graph: MutableGraph<*>, partitionMinSize: Int = MIN_PARTITION_SIZE): List<Graph.Partition>
+    fun decompose(graph: MutableGraph<*, *>, partitionMinSize: Int = MIN_PARTITION_SIZE): List<OrderedPartition>
 
 }

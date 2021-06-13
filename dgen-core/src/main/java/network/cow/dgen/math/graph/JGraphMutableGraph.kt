@@ -17,9 +17,10 @@ open class JGraphMutableGraph<V, E>(
 
     private val adjacencyMap = mutableMapOf<String, MutableSet<String>>()
     private val verticesMap = mutableMapOf<String, V>()
+    private val edgesMap = mutableMapOf<Pair<String, String>, Graph.Edge<E>>()
 
-    final override val edges = mutableSetOf<Graph.Edge<E>>()
-
+    final override val edges: Collection<Graph.Edge<E>>
+        get() = edgesMap.values
     final override val vertices: Collection<V>
         get() = verticesMap.values
     final override val vertexKeys: Set<String>
@@ -31,7 +32,7 @@ open class JGraphMutableGraph<V, E>(
 
     init {
         this.verticesMap.putAll(vertices)
-        this.edges.addAll(edges)
+        this.edgesMap.putAll(edges.associateBy { it.from to it.to })
 
         // fill jgraph with it
         this.verticesMap.keys.forEach { jgraph.addVertex(it) }
@@ -46,12 +47,8 @@ open class JGraphMutableGraph<V, E>(
     }
 
     override fun getVertex(key: String) = this.verticesMap[key]
-    override fun getEdge(from: String, to: String) = this.edges.find { it.from == from && it.to == to }
 
-    override fun getEdge(fromTo: Pair<String, String>): Graph.Edge<E>? {
-        return this.edges.find { it.from == fromTo.first && it.to == fromTo.second }
-    }
-
+    override fun getEdge(fromTo: Pair<String, String>) = this.edgesMap[fromTo]
     override fun getEdgesTo(from: String) = this.edges.filter { it.from == from }
     override fun getEdgesFrom(to: String) = this.edges.filter { it.to == to }
 
@@ -71,7 +68,7 @@ open class JGraphMutableGraph<V, E>(
     }
 
     override fun addEdge(edge: Graph.Edge<E>) {
-        this.edges.add(edge)
+        this.edgesMap[edge.from to edge.to] = edge
 
         this.jgraph.addEdge(edge.from, edge.to)
 
@@ -96,9 +93,11 @@ open class JGraphMutableGraph<V, E>(
     }
 
     override fun removeEdge(from: String, to: String) {
-        this.edges.removeIf { it.from == from && it.to == to }
+        this.edgesMap.remove(from to to)
+        this.edgesMap.remove(to to from)
 
         this.jgraph.removeEdge(from, to)
+        this.jgraph.removeEdge(to, from)
 
         // they are not neighbors anymore
         this.adjacencyMap[from]?.remove(to)

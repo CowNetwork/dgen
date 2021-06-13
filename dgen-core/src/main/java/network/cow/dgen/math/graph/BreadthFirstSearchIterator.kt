@@ -20,7 +20,7 @@ import java.util.Queue
  *
  * @author Tobias Büser
  */
-class BreadthFirstSearchIterator<V>(val graph: Graph<V>, start: String) : Iterator<String> {
+class BreadthFirstSearchIterator(val graph: Graph<*, *>, start: String) : Iterator<String> {
 
     private val visited = mutableMapOf<String, Boolean>()
     private val queue: Queue<String> = LinkedList()

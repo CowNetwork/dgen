@@ -6,6 +6,7 @@ import network.cow.dgen.blueprint.RoomBlueprint
 import network.cow.dgen.math.Vector2D
 import network.cow.dgen.math.graph.BreadthFirstSearchGraphDecomposer
 import network.cow.dgen.math.graph.Graph
+import network.cow.dgen.math.graph.OrderedPartition
 import network.cow.dgen.topology.Topology
 
 /**
@@ -79,7 +80,7 @@ class TopologyDungeonGenerator(
 
     class PartitionPlacerInYourAss(
         val graph: Graph<*, *>,
-        val partition: Graph.Partition,
+        val partition: OrderedPartition,
         val blueprints: List<RoomBlueprint>
     ) {
 
@@ -95,7 +96,7 @@ class TopologyDungeonGenerator(
         // we need the information, how the rooms are connected, maybe through
         // a `RoomStructure`
         private val placedStack = ArrayDeque<MutatedRoomBlueprint>()
-        private val usedBlueprints = mutableListOf<MutableList<String>>()
+        private val usedBlueprints = mutableMapOf<Int, MutableList<String>>()
 
         fun doItDaddy() {
             if (partition.isEmpty() || blueprints.isEmpty()) return
@@ -113,7 +114,7 @@ class TopologyDungeonGenerator(
 
                 // it worked
                 placedStack.addFirst(mutatedBlueprint)
-                val alreadyUsed = usedBlueprints.getOrNull(currentId) ?: mutableListOf()
+                val alreadyUsed = usedBlueprints[currentId] ?: mutableListOf()
                 alreadyUsed.add(blueprint.name)
                 usedBlueprints[currentId] = alreadyUsed
 

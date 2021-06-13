@@ -7,7 +7,7 @@ interface Graph<V, E> {
 
     val vertices: Collection<V>
     val vertexKeys: Set<String>
-    val edges: Set<Edge<E>>
+    val edges: Collection<Edge<E>>
 
     val size: Int
         get() = vertices.size
@@ -30,29 +30,5 @@ interface Graph<V, E> {
         val to: String,
         val descriptor: E
     )
-
-    /**
-     * A partition is just a collection of vertices, that are
-     * connected to each other. But the order of the list does not
-     * correspond to the real connection between them!
-     */
-    class Partition(vertices: List<String>) : ArrayList<String>(vertices) {
-
-        /**
-         * Two partitions are next to each other, when at least
-         * one vertex of this partition has a common edge in [graph]
-         * with one vertex of the [other] partition.
-         */
-        fun isNextTo(graph: Graph<*, *>, other: Partition): Boolean {
-            for (vertex in this) {
-                val neighbors = graph.getNeighbors(vertex)
-                for (otherVertex in other) {
-                    if (otherVertex in neighbors) return true
-                }
-            }
-            return false
-        }
-
-    }
 
 }
