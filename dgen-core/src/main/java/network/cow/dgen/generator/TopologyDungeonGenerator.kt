@@ -3,11 +3,11 @@ package network.cow.dgen.generator
 import network.cow.dgen.DungeonRoom
 import network.cow.dgen.blueprint.MutatedRoomBlueprint
 import network.cow.dgen.blueprint.RoomBlueprint
-import network.cow.dgen.math.Vector2D
 import network.cow.dgen.math.graph.BreadthFirstSearchGraphDecomposer
 import network.cow.dgen.math.graph.Graph
 import network.cow.dgen.math.graph.OrderedPartition
 import network.cow.dgen.topology.Topology
+import java.util.UUID
 
 /**
  * @author Tobias Büser
@@ -84,33 +84,34 @@ class TopologyDungeonGenerator(
         val blueprints: List<RoomBlueprint>
     ) {
 
-        // TODO
-        /*
-        - rename source-origin to to-from
-        - add <E> for the edge type
-        - add Pair(from, to) as key to the edges
-        -> all to the Graph<V, E> class
-         */
-
-        // TODO is not enough
-        // we need the information, how the rooms are connected, maybe through
-        // a `RoomStructure`
+        private val structure = DungeonRoomStructure()
         private val placedStack = ArrayDeque<MutatedRoomBlueprint>()
         private val usedBlueprints = mutableMapOf<Int, MutableList<String>>()
 
         fun doItDaddy() {
+            // if the partition is empty or if there are no
+            // blueprints available, we can just return.
             if (partition.isEmpty() || blueprints.isEmpty()) return
 
             var currentId = 0
 
+            // as long as we did not place as many rooms
+            // as the partition tells us to, loop ..
             while (placedStack.size < partition.size) {
-                // get vertex from partition
+                // get current vertex from partition
                 val vertex = partition[currentId]
-                val blueprint = this.getBlueprintForVertex(vertex) ?: return
+                val possibleBlueprints = this.getPossibleBlueprintsForVertex(vertex)
+                val blueprint = possibleBlueprints.randomOrNull() ?: return
 
-                // try to fit this blueprint to the already created room structure
-                val mutatedBlueprint = MutatedRoomBlueprint(blueprint, listOf(), Vector2D.ZERO)
+                // the blueprint has to fit with all of his neighbors
+                // that are already placed in the structure
+                val neighbors = graph.getNeighbors(vertex).filter { it in this.structure }.map { this.structure.getVertex(it)!! }
+
                 // TODO
+                // fit this blueprint to be connected to his neighbors
+                // and that it does not overlap with any other room
+                val mutatedBlueprint = this.fitWith(vertex, blueprint, neighbors, this.structure)!!
+
 
                 // it worked
                 placedStack.addFirst(mutatedBlueprint)
@@ -123,12 +124,32 @@ class TopologyDungeonGenerator(
 
         }
 
-        private fun getBlueprintForVertex(vertex: String): RoomBlueprint? {
+        private fun fitWith(
+            vertex: String,
+            blueprint: RoomBlueprint,
+            neighbors: List<MutatedRoomBlueprint>,
+            structure: DungeonRoomStructure
+        ): MutatedRoomBlueprint? {
+            // if there are no neighbors, we can just place it and be done with it
+            if (neighbors.isEmpty()) return MutatedRoomBlueprint(randomId(), blueprint)
+
+            // get all free doors from the given neighbors
+            val freeDoorsByNeighbor = neighbors.map { it.id }.associateWith { structure.getFreeDoors(it) }
+
+            // TODO
+            // try to connect the blueprint to any freeDoors of the neighbors
+            // without overlapping with any room in the structure
+            return null
+        }
+
+        private fun getPossibleBlueprintsForVertex(vertex: String): List<RoomBlueprint> {
             // we first need to get the constraints for this room
             val doorSize = graph.getNeighbors(vertex).size
 
-            return blueprints.filter { it.doorCount == doorSize }.randomOrNull()
+            return blueprints.filter { it.doorCount == doorSize }
         }
+
+        private fun randomId() = UUID.randomUUID().toString().take(8)
 
     }
 

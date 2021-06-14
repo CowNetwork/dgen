@@ -10,7 +10,7 @@ import org.jgrapht.graph.DefaultUndirectedGraph
 /**
  * @author Tobias Büser
  */
-open class JGraphMutableGraph<V, E>(
+open class JGraphMutableGraph<V, E : Flippable<E>>(
     vertices: Map<String, V> = mapOf(),
     edges: Set<Graph.Edge<E>> = setOf()
 ) : MutableGraph<V, E> {

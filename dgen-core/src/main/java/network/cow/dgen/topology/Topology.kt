@@ -5,8 +5,6 @@ import network.cow.dgen.math.graph.JGraphMutableGraph
 import network.cow.dgen.math.graph.MutableGraph
 
 /**
- * TODO is not a graph, but contains one
- *
  * @author Tobias Büser
  */
 class Topology(

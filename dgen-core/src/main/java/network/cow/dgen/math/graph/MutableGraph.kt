@@ -3,7 +3,7 @@ package network.cow.dgen.math.graph
 /**
  * @author Tobias Büser
  */
-interface MutableGraph<V, E> : Graph<V, E> {
+interface MutableGraph<V, E : Flippable<E>> : Graph<V, E> {
 
     fun addVertex(key: String, vertex: V)
 
